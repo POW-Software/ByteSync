@@ -58,16 +58,21 @@ public class ApiInvoker : IApiInvoker
         object? requestObject, bool handleResult, CancellationToken cancellationToken)
     {
         using var request = await BuildRequest(httpMethod, resource, additionalHeaders, requestObject);
+        HttpStatusCode? responseStatusCode = null;
 
         try
         {
-            var response = await _httpClient.SendAsync(request, cancellationToken);
+            using var response = await _httpClient.SendAsync(request, cancellationToken);
+            responseStatusCode = response.StatusCode;
             return await HandleResponse<T>(handleResult, response);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred while invoking API: {Resource}", resource);
-            throw new ApiException($"An error occurred while invoking the API on resource {resource}", ex);
+            throw new ApiException($"An error occurred while invoking the API on resource {resource}", ex)
+            {
+                HttpStatusCode = responseStatusCode ?? (ex as ApiException)?.HttpStatusCode
+            };
         }
     }
 
@@ -124,7 +129,7 @@ public class ApiInvoker : IApiInvoker
                 errorMessage += $" Reason: {response.ReasonPhrase}";
             }
             
-            if (!ApiResponseContentHelper.IsEmptyContent(content) && handleResult)
+            if (response.StatusCode != HttpStatusCode.NotFound && !ApiResponseContentHelper.IsEmptyContent(content) && handleResult)
             {
                 return DeserializeContent<T>(content);
             }

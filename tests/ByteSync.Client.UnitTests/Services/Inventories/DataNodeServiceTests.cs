@@ -62,7 +62,7 @@ public class DataNodeServiceTests
             _codeGeneratorMock.Object,
             _dataSourceServiceMock.Object,
             _dataSourceRepositoryMock.Object,
-            _loggerMock.Object);
+            _loggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
     }
     
     [TearDown]

@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using ByteSync.Business;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
@@ -59,6 +59,7 @@ public class InventoryBuilderFactory : IInventoryBuilderFactory
         {
             try
             {
+                _context.Resolve<ILocalSourceAuthorizationService>().CheckNetworkSource(dataSource, dataSource.ClientInstanceId);
                 inventoryBuilder.AddInventoryPart(dataSource);
             }
             catch (Exception ex)

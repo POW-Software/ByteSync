@@ -1,4 +1,4 @@
-﻿using ByteSync.Business;
+using ByteSync.Business;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Business.Inventories;
@@ -184,7 +184,7 @@ public class IdentityBuilderTests : AbstractTester
         
         var processData = new InventoryProcessData();
         var saver = new InventorySaver();
-        var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, inventoryFileAnalyzerLoggerMock.Object);
+        var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode,
             SessionSettingsHelper.BuildDefaultSessionSettings(DataTypes.FilesDirectories, MatchingModes.Tree),
             processData, OSPlatforms.Windows, FingerprintModes.Rsync, loggerMock.Object,

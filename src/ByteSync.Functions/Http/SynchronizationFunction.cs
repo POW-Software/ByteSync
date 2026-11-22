@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using ByteSync.Common.Business.Synchronizations;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Synchronizations;
@@ -27,6 +27,7 @@ public class SynchronizationFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var synchronizationStartRequest = await FunctionHelper.DeserializeRequestBody<SynchronizationStartRequest>(req);
 
+        if (synchronizationStartRequest.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
         var request = new StartSynchronizationRequest(sessionId, client, synchronizationStartRequest.ActionsGroupDefinitions);
         await _mediator.Send(request);
 

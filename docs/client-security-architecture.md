@@ -1,5 +1,7 @@
 # ByteSync Client Security Architecture
 
+> Historical overview. For the current relay identity protocol, authorization boundary, local filesystem permissions, migration and validation status, see [Security boundary changes](security-boundaries.md). The short legacy ClientId described below is a display/trust alias and is not an authenticated identity.
+
 **Last Updated:** November 6, 2025
 **Analyzed Codebase:** ByteSync.Client (.NET 8.0)
 
@@ -52,14 +54,14 @@ public void InitializeRsa()
 
 ### Client Identifier
 
-The `ClientId` is cryptographically derived from the RSA public key:
+The legacy display `ClientId` is derived from the RSA public key:
 
 ```
 ClientId = Base26(SHA256(InstallationId + SHA256(PublicKeyRSA)))
 Format: XXXX-XXX-XXX (e.g., "ABCD-EFG-HIJ")
 ```
 
-This creates a stable, human-readable identifier that is unique to each client's cryptographic identity.
+This creates a human-readable alias. Its numeric reduction does not provide a collision-resistant security identity; the current protocol uses the full SHA-256 fingerprint described in the security boundary document.
 
 ### Local Key Storage
 

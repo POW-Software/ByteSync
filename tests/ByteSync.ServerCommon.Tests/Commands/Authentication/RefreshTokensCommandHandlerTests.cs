@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Auth;
+using ByteSync.Common.Business.Auth;
 using ByteSync.Common.Business.Misc;
 using ByteSync.ServerCommon.Commands.Authentication;
 using ByteSync.ServerCommon.Interfaces.Factories;
@@ -29,7 +29,7 @@ public class RefreshTokensCommandHandlerTests
         var refreshTokensData = new RefreshTokensData
         {
             Token = "refresh-token",
-            ClientInstanceId = "client-123",
+            ClientInstanceId = new string('A', 64) + "_" + Guid.NewGuid().ToString("D"),
             Version = "2.0.0",
             OsPlatform = ByteSync.Common.Business.Misc.OSPlatforms.Windows 
         };
@@ -40,6 +40,7 @@ public class RefreshTokensCommandHandlerTests
 
         var expectedRefreshToken = new ByteSync.ServerCommon.Business.Auth.RefreshToken
         {
+            AuthenticationEpoch = AuthenticationProtocol.Epoch,
             Token = "refresh-token",
             Expires = DateTimeOffset.UtcNow.AddDays(7),
             Created = DateTimeOffset.UtcNow,
@@ -63,6 +64,8 @@ public class RefreshTokensCommandHandlerTests
         var client = new ByteSync.ServerCommon.Business.Auth.Client
         {
             ClientInstanceId = refreshTokensData.ClientInstanceId,
+            Identity = new string('A', 64),
+            AuthenticationEpoch = AuthenticationProtocol.Epoch,
             RefreshToken = expectedRefreshToken
         };
 

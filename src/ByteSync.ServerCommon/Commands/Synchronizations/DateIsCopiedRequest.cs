@@ -1,8 +1,9 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.ServerCommon.Business.Auth;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class DateIsCopiedRequest : IActionCompletedRequest
+public class DateIsCopiedRequest : IActionCompletedRequest, ISessionRequest
 {
     public DateIsCopiedRequest(string sessionId, Client client, List<string> actionsGroupIds, string? nodeId)
     {

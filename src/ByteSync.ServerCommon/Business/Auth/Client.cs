@@ -11,6 +11,9 @@ public enum ClientStatuses
 
 public class Client
 {
+    public string? Identity { get; set; }
+    public int AuthenticationEpoch { get; set; }
+
     public Client()
     {
 

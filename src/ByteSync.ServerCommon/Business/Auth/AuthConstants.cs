@@ -11,6 +11,8 @@ public static class AuthConstants
     public const string CLAIM_CLIENT_ID = "clientId";
     public const string CLAIM_CLIENT_INSTANCE_ID = "clientInstanceId";
     public const string CLAIM_VERSION = "version";
+    public const string CLAIM_IDENTITY = "identity";
+    public const string CLAIM_AUTHENTICATION_EPOCH = "authenticationEpoch";
     public const string CLAIM_OS_PLATFORM = "osPlatform";
     
     public const string FUNCTION_CONTEXT_CLIENT = "Client";

@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Sessions.Cloud.Connections;
+using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Helpers;
@@ -36,10 +36,12 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
     {
         var parameters = request.FinalizeJoinCloudSessionParameters;
         var client = request.Client;
+        if (parameters.JoinerInstanceId != client.ClientInstanceId) throw new UnauthorizedAccessException();
         
         FinalizeJoinSessionStatuses? finalizeJoinSessionStatus = null;
         SessionMemberData? joiner = null;
         
+        await using var sessionLock = await _redisInfrastructureService.AcquireLockAsync(ByteSync.ServerCommon.Entities.EntityType.Session, parameters.SessionId);
         var transaction = _redisInfrastructureService.OpenTransaction();
         
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, innerCloudSessionData =>
@@ -53,10 +55,10 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
                 finalizeJoinSessionStatus = FinalizeJoinSessionStatuses.SessionAlreadyActivated;
             }
             else if (innerCloudSessionData.SessionMembers
-                     .Count(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId)) > 0)
+                     .Count(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId, client.Identity)) > 0)
             {
                 var nonAuthCheckedMembers = innerCloudSessionData.SessionMembers
-                    .Where(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId))
+                    .Where(sm => !sm.IsAuthCheckedFor(parameters.JoinerInstanceId, client.Identity))
                     .Select(sm => sm.ClientInstanceId)
                     .ToList().JoinToString(",");
 
@@ -72,7 +74,10 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
                     .FirstOrDefault(m =>
                         Equals(m.ClientInstanceId, parameters.JoinerInstanceId) && 
                         Equals(m.ValidatorInstanceId, parameters.ValidatorInstanceId) &&
-                        Equals(m.FinalizationPassword, parameters.FinalizationPassword));
+                        Equals(m.FinalizationPassword, parameters.FinalizationPassword) &&
+                        !string.IsNullOrEmpty(m.FinalizationPassword) && m.Identity == client.Identity &&
+                        m.JoinExpiresAt > DateTimeOffset.UtcNow &&
+                        innerCloudSessionData.FindMember(parameters.ValidatorInstanceId) != null);
 
                 if (joiner == null)
                 {
@@ -82,6 +87,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
 
             if (joiner != null && finalizeJoinSessionStatus == null)
             {
+                joiner.FinalizationPassword = "";
                 joiner.EncryptedPrivateData = parameters.EncryptedSessionMemberPrivateData;
                     
                 innerCloudSessionData.SessionMembers.Remove(joiner);
@@ -96,7 +102,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
             {
                 return false;
             }
-        }, transaction);
+        }, transaction, sessionLock);
         
         if (updateResult.IsWaitingForTransaction)
         {
@@ -104,7 +110,7 @@ public class FinalizeJoinCloudSessionCommandHandler : IRequestHandler<FinalizeJo
 
             await _clientsGroupsService.AddSessionSubscription(client, parameters.SessionId, transaction);
 
-            await transaction.ExecuteAsync();
+            if (!await transaction.ExecuteAsync()) throw new InvalidOperationException("Join transaction was not committed");
             
             await _invokeClientsService.SessionGroup(parameters.SessionId).MemberJoinedSession(sessionMemberInfo).ConfigureAwait(false);
             await _clientsGroupsService.AddToSessionGroup(client, parameters.SessionId).ConfigureAwait(false);

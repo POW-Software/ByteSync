@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Lobbies;
+using ByteSync.Common.Business.Lobbies;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Repositories;
@@ -27,6 +27,7 @@ public class LobbyService : ILobbyService
         
         var result = await _lobbyRepository.Update(lobbyId, lobby =>
         {
+            if (lobby.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch) throw new UnauthorizedAccessException();
             lobbyMember = lobby.ConnectedLobbyMembers.SingleOrDefault(m => m.ClientInstanceId.Equals(client.ClientInstanceId));
             
             if (lobbyMember != null)
@@ -58,13 +59,13 @@ public class LobbyService : ILobbyService
     {
         var lobby = await _lobbyRepository.Get(lobbyCloudSessionCredentials.LobbyId);
 
-        if (lobby != null)
+        if (lobby?.AuthenticationEpoch == ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch)
         {
             var firstCell = lobby.LobbyMemberCells.FirstOrDefault();
             if (firstCell is { LobbyMember: not null } && firstCell.LobbyMember.ClientInstanceId .Equals(client.ClientInstanceId))
             {
-                _logger.LogInformation("SendLobbyCloudSessionCredentials: {@credentials} sent to {@recipient}", 
-                    lobbyCloudSessionCredentials, lobbyCloudSessionCredentials.Recipient);
+                if (lobby.GetLobbyMemberByClientInstanceId(lobbyCloudSessionCredentials.Recipient) == null) throw new UnauthorizedAccessException();
+                _logger.LogInformation("Lobby credentials sent to {Recipient}", lobbyCloudSessionCredentials.Recipient);
                 
                 await _invokeClientsService.Client(lobbyCloudSessionCredentials.Recipient)
                     .LobbyCloudSessionCredentialsSent(lobbyCloudSessionCredentials).ConfigureAwait(false);
@@ -76,7 +77,7 @@ public class LobbyService : ILobbyService
     {
         var lobby = await _lobbyRepository.Get(lobbyCheckInfo.LobbyId);
         
-        if (lobby != null && lobby.LobbyMemberCells.Any(c => c.LobbyMember != null && c.LobbyMember.ClientInstanceId == client.ClientInstanceId))
+        if (lobby?.AuthenticationEpoch == ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch && lobby.LobbyMemberCells.Any(c => c.LobbyMember != null && c.LobbyMember.ClientInstanceId == client.ClientInstanceId))
         {
             await _invokeClientsService.LobbyGroup(lobbyCheckInfo.LobbyId)
                 .LobbyCheckInfosSent(lobbyCheckInfo.LobbyId, lobbyCheckInfo).ConfigureAwait(false);

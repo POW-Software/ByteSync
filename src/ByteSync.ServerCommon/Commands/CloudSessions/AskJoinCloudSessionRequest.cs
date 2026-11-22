@@ -1,11 +1,14 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
-public class AskJoinCloudSessionRequest : IRequest<JoinSessionResult>
+public class AskJoinCloudSessionRequest : IRequest<JoinSessionResult>, ISessionRequest
 {
+    public string SessionId => Parameters.SessionId;
+
     public AskJoinCloudSessionRequest(Client client, AskJoinCloudSessionParameters parameters)
     {
         Client = client;

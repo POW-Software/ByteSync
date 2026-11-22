@@ -7,6 +7,7 @@ public enum InitialConnectionStatus
     UndefinedClientId = 3,
     UndefinedClientInstanceId = 4,
     UnknownOsPlatform = 5,
+    InvalidProof = 6,
     ClientAlreadyConnected = 10,
     UnknownError = 11,
 }

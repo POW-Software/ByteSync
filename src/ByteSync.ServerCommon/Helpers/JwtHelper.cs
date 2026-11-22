@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using ByteSync.ServerCommon.Business.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +20,18 @@ public static class JwtHelper
             })
             .AddJwtBearer(option =>
             {
+                option.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var instance = context.Principal?.FindFirst(AuthConstants.CLAIM_CLIENT_INSTANCE_ID)?.Value;
+                        var repository = context.HttpContext.RequestServices.GetRequiredService<ByteSync.ServerCommon.Interfaces.Repositories.IClientsRepository>();
+                        var client = instance == null ? null : await repository.Get(instance);
+                        if (client == null) { context.Fail("Unknown client"); return; }
+                        try { ByteSync.ServerCommon.Security.ClientAuthentication.ValidateClaims(client, context.Principal!); }
+                        catch (SecurityTokenValidationException) { context.Fail("Authentication epoch or identity mismatch"); }
+                    }
+                };
                 option.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -28,7 +40,8 @@ public static class JwtHelper
 
                     ClockSkew = TimeSpan.Zero,
 
-                    ValidateIssuerSigningKey = false,
+                    ValidateIssuerSigningKey = true,
+                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
                     ValidIssuer = AuthConstants.ISSUER,
                     ValidAudience = AuthConstants.AUDIENCE,
                     IssuerSigningKey = new SymmetricSecurityKey(key), 
@@ -42,6 +55,8 @@ public static class JwtHelper
         {
             option.AddPolicy(AuthConstants.CLAIMBASEDAUTH, policy =>
             {
+                policy.RequireClaim(AuthConstants.CLAIM_AUTHENTICATION_EPOCH, ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch.ToString());
+                policy.RequireClaim(AuthConstants.CLAIM_IDENTITY);
                 policy.RequireClaim(AuthConstants.CLAIM_CLIENT_ID);
                 policy.RequireClaim(AuthConstants.CLAIM_CLIENT_INSTANCE_ID);
                 policy.RequireClaim(AuthConstants.CLAIM_VERSION);
@@ -49,6 +64,8 @@ public static class JwtHelper
 
             option.FallbackPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
+                .RequireClaim(AuthConstants.CLAIM_AUTHENTICATION_EPOCH, ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch.ToString())
+                .RequireClaim(AuthConstants.CLAIM_IDENTITY)
                 .Build();
         });
     }

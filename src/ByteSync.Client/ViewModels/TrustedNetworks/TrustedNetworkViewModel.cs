@@ -1,4 +1,9 @@
-﻿using System.Reactive;
+using ByteSync.Interfaces.Services.Sessions;
+using ByteSync.Interfaces.Services.Communications;
+using ByteSync.Interfaces.Repositories;
+using ByteSync.Business.Sessions;
+using ByteSync.Business.Communications;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
@@ -40,7 +45,8 @@ public class TrustedNetworkViewModel : FlyoutElementViewModel
 
     public TrustedNetworkViewModel(IPublicKeysManager publicKeysManager, 
         IApplicationSettingsRepository applicationSettingsManager, TrustedPublicKeysViewModel trustedPublicKeysViewModel,
-        IMessageBoxViewModelFactory messageBoxViewModelFactory) 
+        IMessageBoxViewModelFactory messageBoxViewModelFactory, ISessionService session,
+        ICloudSessionConnectionRepository sessionConnection, IConnectionService connection)
     {
     #if DEBUG
         if (Design.IsDesignMode)
@@ -56,7 +62,11 @@ public class TrustedNetworkViewModel : FlyoutElementViewModel
         _messageBoxViewModelFactory = messageBoxViewModelFactory;
         
         var canRun = new BehaviorSubject<bool>(true);
-        RenewPublicKeyCommand = ReactiveCommand.CreateFromTask(RenewPublicKey, canRun);
+        var canRenew = Observable.CombineLatest(canRun, session.SessionObservable,
+            sessionConnection.ConnectionStatusObservable, connection.ConnectionStatus,
+            (idle, currentSession, sessionStatus, connectionStatus) => idle && currentSession == null &&
+                sessionStatus == SessionConnectionStatus.NoSession && connectionStatus != ConnectionStatuses.Connecting);
+        RenewPublicKeyCommand = ReactiveCommand.CreateFromTask(RenewPublicKey, canRenew);
         DeleteTrustedPublicKeyCommand = ReactiveCommand.CreateFromTask<TrustedPublicKeyViewModel>(DeleteTrustedPublicKey, canRun);
         Observable.Merge(RenewPublicKeyCommand.IsExecuting, DeleteTrustedPublicKeyCommand.IsExecuting)
             .Select(executing => !executing).Subscribe(canRun);
@@ -95,12 +105,12 @@ public class TrustedNetworkViewModel : FlyoutElementViewModel
         await AskAndDo(nameof(Resources.TrustedPublicKeyView_DeleteTrustedPublicKey_Title), 
             nameof(Resources.TrustedPublicKeyView_DeleteTrustedPublicKey_Message), 
             new string[] {trustedPublicKeyViewModel.ClientId, trustedPublicKeyViewModel.TrustedPublicKey.PublicKeyHash},
-            () => _publicKeysManager.Delete(trustedPublicKeyViewModel.TrustedPublicKey));
+            () => { _publicKeysManager.Delete(trustedPublicKeyViewModel.TrustedPublicKey); return Task.CompletedTask; });
 
         TrustedPublicKeys.Refresh();
     }
 
-    private async Task AskAndDo(string title, string message, string[]? messageArguments, Action action, 
+    private async Task AskAndDo(string title, string message, string[]? messageArguments, Func<Task> action,
         [CallerMemberName] string caller = "")
     {
         try
@@ -112,7 +122,7 @@ public class TrustedNetworkViewModel : FlyoutElementViewModel
 
             if (result == MessageBoxResult.Yes)
             {
-                action.Invoke();
+                await action();
             }
         }
         catch (Exception ex)

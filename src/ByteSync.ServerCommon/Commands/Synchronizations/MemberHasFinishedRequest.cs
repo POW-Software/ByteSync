@@ -1,9 +1,10 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class MemberHasFinishedRequest : IRequest
+public class MemberHasFinishedRequest : IRequest, ISessionRequest
 {
     public MemberHasFinishedRequest(string sessionId, Client client)
     {

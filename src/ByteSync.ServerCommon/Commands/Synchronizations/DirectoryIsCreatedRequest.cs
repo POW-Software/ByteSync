@@ -1,8 +1,9 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.ServerCommon.Business.Auth;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class DirectoryIsCreatedRequest : IActionCompletedRequest
+public class DirectoryIsCreatedRequest : IActionCompletedRequest, ISessionRequest
 {
     public DirectoryIsCreatedRequest(string sessionId, Client client, List<string> actionsGroupIds, string? nodeId)
     {

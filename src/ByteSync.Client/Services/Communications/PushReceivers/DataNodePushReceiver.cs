@@ -27,7 +27,8 @@ public class DataNodePushReceiver : IPushReceiver
             .Subscribe(dto =>
             {
                 var dataNode = _dataEncrypter.DecryptDataNode(dto.EncryptedDataNode);
-                dataNode.ClientInstanceId = dto.ClientInstanceId;
+                if (dataNode.ClientInstanceId != dto.ClientInstanceId || dataNode.Id != dto.EncryptedDataNode.Id)
+                    throw new UnauthorizedAccessException("Node owner or id mismatch");
                 _dataNodeService.ApplyAddDataNodeLocally(dataNode);
             });
 
@@ -36,7 +37,8 @@ public class DataNodePushReceiver : IPushReceiver
             .Subscribe(dto =>
             {
                 var dataNode = _dataEncrypter.DecryptDataNode(dto.EncryptedDataNode);
-                dataNode.ClientInstanceId = dto.ClientInstanceId;
+                if (dataNode.ClientInstanceId != dto.ClientInstanceId || dataNode.Id != dto.EncryptedDataNode.Id)
+                    throw new UnauthorizedAccessException("Node owner or id mismatch");
                 _dataNodeService.ApplyRemoveDataNodeLocally(dataNode);
             });
     }

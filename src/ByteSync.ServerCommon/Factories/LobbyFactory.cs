@@ -1,4 +1,4 @@
-﻿using ByteSync.ServerCommon.Entities;
+using ByteSync.ServerCommon.Entities;
 using ByteSync.ServerCommon.Interfaces.Factories;
 
 namespace ByteSync.ServerCommon.Factories;
@@ -8,6 +8,7 @@ public class LobbyFactory : ILobbyFactory
     public Lobby BuildLobby(CloudSessionProfileEntity cloudSessionProfileData)
     {
         Lobby lobby = new Lobby();
+        lobby.AuthenticationEpoch = cloudSessionProfileData.AuthenticationEpoch;
         
         lobby.LobbyId = $"LobbyID_{Guid.NewGuid()}";
         

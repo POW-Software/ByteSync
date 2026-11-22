@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.EndPoints;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Helpers;
@@ -32,6 +32,9 @@ public class ClientsService : IClientsService
     {
         var result = await _clientsRepository.AddOrUpdate(clientInstanceId, client =>
         {
+            if (client == null || client.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch ||
+                !ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf(client.ClientInstanceId, client.Identity ?? ""))
+                return null;
             if (client != null)
             {
                 client.SetConnected(connectionId);

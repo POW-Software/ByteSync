@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using ByteSync.Business.Profiles;
@@ -27,6 +27,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
     
     public string GetProfileZipPath(string profileId)
     {
+        ByteSync.Services.Synchronizations.LocalPathSafety.ValidateComponent(profileId);
         var profilesDirectory = IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, "Profiles", profileId);
         Directory.CreateDirectory(profilesDirectory);
         
@@ -39,6 +40,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
     {
         if (sharedFileDefinition.IsProfileDetails)
         {
+            ByteSync.Services.Synchronizations.LocalPathSafety.ValidateComponent(sharedFileDefinition.AdditionalName);
             var profilesDirectory = IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, "Profiles", sharedFileDefinition.AdditionalName);
             Directory.CreateDirectory(profilesDirectory);
             
@@ -55,6 +57,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
 
     public DirectoryInfo GetProfileDirectory(AbstractSessionProfile sessionProfile)
     {
+        ByteSync.Services.Synchronizations.LocalPathSafety.ValidateComponent(sessionProfile.ProfileId);
         var profileDirectory = IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, "Profiles", sessionProfile.ProfileId);
 
         return new DirectoryInfo(profileDirectory);
@@ -62,6 +65,7 @@ public class SessionProfileLocalDataManager : ISessionProfileLocalDataManager
     
     public DirectoryInfo GetProfileDirectory(AbstrastSessionProfileDetails abstrastSessionProfileDetails)
     {
+        ByteSync.Services.Synchronizations.LocalPathSafety.ValidateComponent(abstrastSessionProfileDetails.ProfileId);
         var profileDirectory = IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, "Profiles", abstrastSessionProfileDetails.ProfileId);
 
         return new DirectoryInfo(profileDirectory);

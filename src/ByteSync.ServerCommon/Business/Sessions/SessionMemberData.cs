@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.EndPoints;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Auth;
 
@@ -17,6 +17,7 @@ public class SessionMemberData
         CloudSessionData cloudSessionData, EncryptedSessionMemberPrivateData? encryptedSessionMemberPrivateData = null)
         : this(client.ClientInstanceId, client.ClientId, publicKeyInfo, profileClientId, cloudSessionData, encryptedSessionMemberPrivateData)
     {
+        Identity = client.Identity;
     }
     
     public SessionMemberData(string clientInstanceId, string clientId, PublicKeyInfo publicKeyInfo, string? profileClientId,
@@ -38,6 +39,8 @@ public class SessionMemberData
     public string ClientInstanceId { get; set; } = null!;
 
     public string ClientId { get; set; } = null!;
+    public string? Identity { get; set; }
+    public DateTimeOffset JoinExpiresAt { get; set; }
 
     public PublicKeyInfo PublicKeyInfo { get; set; } = null!;
 
@@ -88,8 +91,9 @@ public class SessionMemberData
         return ClientInstanceId.GetHashCode();
     }
 
-    public bool IsAuthCheckedFor(string joinerInstanceId)
+    public bool IsAuthCheckedFor(string joinerInstanceId, string? joinerIdentity = null)
     {
-        return AuthCheckClientInstanceIds.Contains(joinerInstanceId) || joinerInstanceId.StartsWith(ClientId);
+        return AuthCheckClientInstanceIds.Contains(joinerInstanceId) ||
+               (Identity != null && Identity == joinerIdentity && ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf(joinerInstanceId, Identity));
     }
 }

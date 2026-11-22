@@ -66,8 +66,9 @@ public class SendDigitalSignaturesCommandHandlerTests
             IsAuthCheckOK = true
         };
 
-        var cloudSession = new CloudSessionData(dataId, new EncryptedSessionSettings(), client);
+        var cloudSession = new CloudSessionData(dataId, new EncryptedSessionSettings(), client) { AuthenticationEpoch = ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch };
         cloudSession.SessionMembers.Add(new SessionMemberData { ClientInstanceId = clientInstanceId });
+        cloudSession.PreSessionMembers.Add(new SessionMemberData { ClientInstanceId = recipientInstanceId });
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(dataId))
             .Returns(Task.FromResult<CloudSessionData?>(cloudSession));
@@ -121,12 +122,14 @@ public class SendDigitalSignaturesCommandHandlerTests
             .Returns(Task.FromResult<CloudSessionData?>(null));
             
         var profileClientId = "profileClient";
-        var lobby = new Lobby { LobbyId = dataId };
+        var lobby = new Lobby { LobbyId = dataId, AuthenticationEpoch = ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch };
         var lobbyMember = new LobbyMember(profileClientId, new PublicKeyInfo(), JoinLobbyModes.Join, client);
         var lobbyMemberCell = new LobbyMemberCell("profileClient");
         lobbyMemberCell.LobbyMember = lobbyMember;
         
         lobby.LobbyMemberCells.Add(lobbyMemberCell);
+        lobby.LobbyMemberCells.Add(new LobbyMemberCell("recipient-profile") { LobbyMember = new LobbyMember("recipient-profile",
+            new PublicKeyInfo(), JoinLobbyModes.Join, new Client { ClientInstanceId = recipientInstanceId }) });
 
         A.CallTo(() => _mockLobbyRepository.Get(dataId))
             .Returns(Task.FromResult<Lobby?>(lobby));
@@ -209,7 +212,7 @@ public class SendDigitalSignaturesCommandHandlerTests
             DigitalSignatureCheckInfos = new List<DigitalSignatureCheckInfo> { digitalSignatureCheckInfo }
         };
 
-        var cloudSession = new CloudSessionData(dataId, new EncryptedSessionSettings(), client);
+        var cloudSession = new CloudSessionData(dataId, new EncryptedSessionSettings(), client) { AuthenticationEpoch = ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch };
         cloudSession.SessionMembers.Add(new SessionMemberData { ClientInstanceId = "differentClientId" });
         
         A.CallTo(() => _mockCloudSessionsRepository.Get(dataId))

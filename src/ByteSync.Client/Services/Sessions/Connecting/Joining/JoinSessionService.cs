@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.Sessions;
+using ByteSync.Business.Sessions;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Business.Sessions.RunSessionInfos;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
@@ -76,6 +76,10 @@ public class JoinSessionService : IJoinSessionService
         _logger.LogInformation("Start joining the Cloud Session {sessionId}: getting password exchange encryption key", sessionId);
 
         await _cloudSessionConnectionRepository.SetCloudSessionConnectionData(sessionId, sessionPassword, lobbySessionDetails);
+
+        var begin = new AskCloudSessionPasswordExchangeKeyParameters(sessionId, _publicKeysManager.GetMyPublicKeyInfo())
+        { LobbyId = lobbySessionDetails?.LobbyId, ProfileClientId = lobbySessionDetails?.LocalProfileClientId };
+        await _cloudSessionApiClient.BeginJoin(begin, _cloudSessionConnectionRepository.CancellationToken);
 
         var joinSessionResult = await _publicKeysTruster.TrustAllMembersPublicKeys(sessionId, _cloudSessionConnectionRepository.CancellationToken);
         if (!joinSessionResult.IsOK)

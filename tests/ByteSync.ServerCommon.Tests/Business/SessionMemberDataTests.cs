@@ -203,7 +203,7 @@ public class SessionMemberDataTests
     }
 
     [Test]
-    public void IsAuthCheckedFor_WhenInstanceIdStartsWithClientId_ShouldReturnTrue()
+    public void IsAuthCheckedFor_WhenInstanceIdStartsWithClientId_ShouldReturnFalse()
     {
         // Arrange
         _sessionMemberData.ClientId = "client-prefix";
@@ -212,7 +212,7 @@ public class SessionMemberDataTests
         bool result = _sessionMemberData.IsAuthCheckedFor("client-prefix-suffix");
 
         // Assert
-        result.Should().BeTrue();
+        result.Should().BeFalse();
     }
 
     [Test]

@@ -46,6 +46,7 @@ public class AddDataNodeCommandHandler : IRequestHandler<AddDataNodeRequest, boo
         {
             inventoryData ??= new InventoryEntity(sessionId);
 
+            if (inventoryData.InventoryMembers.Where(m => m.ClientInstanceId != client.ClientInstanceId).SelectMany(m => m.DataNodes).Any(n => n.Id == encryptedDataNode.Id)) throw new UnauthorizedAccessException("Resource id belongs to another member");
             if (!inventoryData.IsInventoryStarted)
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);

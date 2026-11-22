@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Inventories;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Misc;
 using ByteSync.Models.FileSystems;
 
@@ -23,6 +23,8 @@ public class InventoryPart
     public Inventory Inventory { get; set; }
     
     public string RootPath { get; set; }
+
+    public string? SourceId { get; set; }
     
     public FileSystemTypes InventoryPartType { get; set; }
     

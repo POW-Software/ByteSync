@@ -1,10 +1,11 @@
-﻿using ByteSync.Common.Business.Sessions;
+using ByteSync.ServerCommon.Security;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.CloudSessions;
 
-public class UpdateSessionSettingsRequest : IRequest<bool>
+public class UpdateSessionSettingsRequest : IRequest<bool>, ISessionRequest
 {
     public UpdateSessionSettingsRequest(string sessionId, Client client, EncryptedSessionSettings settings)
     {

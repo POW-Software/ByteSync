@@ -31,6 +31,7 @@ public class LobbyFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var parameters = await FunctionHelper.DeserializeRequestBody<JoinLobbyParameters>(req);
             
+        if (parameters.CloudSessionProfileId != cloudSessionProfileId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Profile route mismatch");
         var request = new TryJoinLobbyRequest(parameters, client);
         var result = await _mediator.Send(request);
 
@@ -50,6 +51,7 @@ public class LobbyFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var lobbyCloudSessionCredentials = await FunctionHelper.DeserializeRequestBody<LobbyCloudSessionCredentials>(req);
             
+        if (lobbyCloudSessionCredentials.LobbyId != lobbyId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Lobby route mismatch");
         await _lobbyService.SendLobbyCloudSessionCredentials(lobbyCloudSessionCredentials, client);
           
         var response = req.CreateResponse();
@@ -86,6 +88,7 @@ public class LobbyFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var lobbyCheckInfo = await FunctionHelper.DeserializeRequestBody<LobbyCheckInfo>(req);
             
+        if (lobbyCheckInfo.LobbyId != lobbyId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Lobby route mismatch");
         await _lobbyService.SendLobbyCheckInfos(lobbyCheckInfo, client);
             
         var response = req.CreateResponse();

@@ -8,15 +8,15 @@ namespace TestingCommon.Business.Versions;
 public class ProtocolVersionTests
 {
     [Test]
-    public void Current_ShouldBeV2()
+    public void Current_ShouldBeV3()
     {
-        ProtocolVersion.CURRENT.Should().Be(ProtocolVersion.V2);
+        ProtocolVersion.CURRENT.Should().Be(ProtocolVersion.V3);
     }
     
     [Test]
-    public void MinSupported_ShouldBeV2()
+    public void MinSupported_ShouldBeV3()
     {
-        ProtocolVersion.MIN_SUPPORTED.Should().Be(ProtocolVersion.V2);
+        ProtocolVersion.MIN_SUPPORTED.Should().Be(ProtocolVersion.V3);
     }
     
     [Test]
@@ -34,6 +34,12 @@ public class ProtocolVersionTests
         
         result.Should().BeFalse();
     }
+
+    [Test]
+    public void IsCompatible_WithLegacyV2_ShouldReturnFalse()
+    {
+        ProtocolVersion.IsCompatible(ProtocolVersion.V2).Should().BeFalse();
+    }
     
     [Test]
     public void IsCompatible_WithZero_ShouldReturnFalse()
@@ -46,7 +52,7 @@ public class ProtocolVersionTests
     [Test]
     public void IsCompatible_WithDifferentVersion_ShouldReturnFalse()
     {
-        var result = ProtocolVersion.IsCompatible(3);
+        var result = ProtocolVersion.IsCompatible(ProtocolVersion.CURRENT + 1);
         
         result.Should().BeFalse();
     }

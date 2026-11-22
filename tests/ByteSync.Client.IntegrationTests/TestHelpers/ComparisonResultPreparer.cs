@@ -1,4 +1,4 @@
-﻿using ByteSync.Business;
+using ByteSync.Business;
 using ByteSync.Business.DataNodes;
 using ByteSync.Business.Inventories;
 using ByteSync.Business.SessionMembers;
@@ -99,7 +99,7 @@ public class ComparisonResultPreparer
             
             var processData = new InventoryProcessData();
             var saver = new InventorySaver();
-            var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, InventoryFileAnalyzerLoggerMock.Object);
+            var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, processData, saver, InventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             var inventoryBuilder = new InventoryBuilder(sessionMemberInfo, dataNode, SessionSettings, processData,
                 OSPlatforms.Windows, FingerprintModes.Rsync, inventoryBuilderloggerMock.Object,
                 analyzer,

@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Sessions;
+using ByteSync.Common.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Repositories;
 using ByteSync.ServerCommon.Interfaces.Services;
 using ByteSync.ServerCommon.Interfaces.Services.Clients;
@@ -47,6 +47,7 @@ public class AddDataSourceCommandHandler : IRequestHandler<AddDataSourceRequest,
         {
             inventoryData ??= new InventoryEntity(sessionId);
 
+            if (inventoryData.InventoryMembers.Where(m => m.ClientInstanceId != client.ClientInstanceId).SelectMany(m => m.DataNodes).SelectMany(n => n.DataSources).Any(s => s.Id == encryptedDataSource.Id)) throw new UnauthorizedAccessException("Resource id belongs to another member");
             if (!inventoryData.IsInventoryStarted)
             {
                 var inventoryMember = _inventoryMemberService.GetOrCreateInventoryMember(inventoryData, sessionId, client);

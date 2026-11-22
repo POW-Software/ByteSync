@@ -91,7 +91,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             
@@ -187,7 +187,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             
@@ -293,7 +293,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             
@@ -385,7 +385,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             
@@ -495,7 +495,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             
@@ -609,7 +609,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             
@@ -714,7 +714,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             
@@ -794,7 +794,7 @@ public class InventoryBuilderAccessHandling_IntegrationTests : IntegrationTest
             
             var inventorySaver = new InventorySaver();
             var inventoryFileAnalyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, _inventoryProcessData, inventorySaver,
-                inventoryFileAnalyzerLoggerMock.Object);
+                inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
             
             var inventoryIndexer = new InventoryIndexer();
             

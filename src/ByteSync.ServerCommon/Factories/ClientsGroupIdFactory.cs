@@ -1,4 +1,4 @@
-﻿using ByteSync.ServerCommon.Interfaces.Factories;
+using ByteSync.ServerCommon.Interfaces.Factories;
 
 namespace ByteSync.ServerCommon.Factories;
 
@@ -10,16 +10,16 @@ public class ClientsGroupIdFactory : IClientsGroupIdFactory
     
     public string GetClientGroupId(string clientInstanceId)
     {
-        return CLIENT_PREFIX + clientInstanceId;
+        return $"Auth{ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch}_" + CLIENT_PREFIX + clientInstanceId;
     }
     
     public string GetSessionGroupId(string sessionId)
     {
-        return SESSION_PREFIX + sessionId;
+        return $"Auth{ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch}_" + SESSION_PREFIX + sessionId;
     }
     
     public string GetLobbyGroupId(string lobbyId)
     {
-        return LOBBY_PREFIX + lobbyId;
+        return $"Auth{ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch}_" + LOBBY_PREFIX + lobbyId;
     }
 }

@@ -38,7 +38,7 @@ public class DataSourcePushReceiverTests
         _hubPushHandlerMock.SetupGet(h => h.DataSourceRemoved).Returns(_removedSubject);
         
         _ = new DataSourcePushReceiver(_sessionServiceMock.Object, _dataEncrypterMock.Object,
-            _hubPushHandlerMock.Object, _dataSourceServiceMock.Object);
+            _hubPushHandlerMock.Object, _dataSourceServiceMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
     }
     
     [Test]

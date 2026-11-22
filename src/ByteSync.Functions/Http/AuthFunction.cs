@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
 using ByteSync.Common.Business.Auth;
 using ByteSync.Functions.Helpers.Misc;
 using ByteSync.ServerCommon.Commands.Authentication;
@@ -19,8 +20,22 @@ public class AuthFunction
     }
 
     [AllowAnonymous]
+    [Function("AuthenticationChallenge")]
+    public async Task<HttpResponseData> Challenge(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/challenge")] HttpRequestData req,
+        FunctionContext context)
+    {
+        var login = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
+        var service = context.InstanceServices.GetRequiredService<ByteSync.ServerCommon.Interfaces.Services.IAuthenticationChallengeService>();
+        var challenge = await service.Create(login);
+        var response = req.CreateResponse();
+        await response.WriteAsJsonAsync(challenge);
+        return response;
+    }
+
+    [AllowAnonymous]
     [Function("Login")]
-    public async Task<HttpResponseData> Login([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/login")] HttpRequestData req, 
+    public async Task<HttpResponseData> Login([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/login")] HttpRequestData req,
         FunctionContext executionContext)
     {
         var loginData = await FunctionHelper.DeserializeRequestBody<LoginData>(req);
@@ -42,7 +57,7 @@ public class AuthFunction
     }
     
     [Function("RefreshTokens")]
-    public async Task<HttpResponseData> RefreshTokens([HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", Route = "auth/refreshTokens")] HttpRequestData req, 
+    public async Task<HttpResponseData> RefreshTokens([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/refreshTokens")] HttpRequestData req,
         FunctionContext executionContext)
     {
         var refreshTokensData = await FunctionHelper.DeserializeRequestBody<RefreshTokensData>(req);

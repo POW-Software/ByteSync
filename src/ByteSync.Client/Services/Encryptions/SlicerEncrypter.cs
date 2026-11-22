@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using ByteSync.Business.Communications.Transfers;
@@ -13,6 +13,7 @@ public class SlicerEncrypter : ISlicerEncrypter
     private readonly ICloudSessionConnectionRepository _cloudSessionConnectionRepository;
     private readonly ILogger<SlicerEncrypter> _logger;
         
+    public Action? ValidateAccess { get; set; }
     private int _maxSliceLength;
 
     public SlicerEncrypter(ICloudSessionConnectionRepository cloudSessionConnectionRepository,
@@ -29,7 +30,7 @@ public class SlicerEncrypter : ISlicerEncrypter
     {
         SharedFileDefinition = sharedFileDefinition;
             
-        InStream = new FileStream(fileToEncrypt.FullName, FileMode.Open, FileAccess.Read);
+        InStream = ByteSync.Services.Synchronizations.LocalPathSafety.OpenRead(fileToEncrypt.FullName);
         InReader = new BinaryReader(InStream);
         
         EndInitialize();
@@ -85,6 +86,7 @@ public class SlicerEncrypter : ISlicerEncrypter
         CryptoStream? cryptoStream = null;
         FileUploaderSlice? fileUploaderSlice = null;
 
+        ValidateAccess?.Invoke();
         var bytes = InReader.ReadBytes(BufferSize);
         var readBytes = bytes.Length;
         var thisSessionReadBytes = readBytes;

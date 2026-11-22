@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.EndPoints;
+using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Business.Sessions.Cloud;
 using ByteSync.Common.Business.Sessions.Cloud.Connections;
 using ByteSync.Common.Helpers;
@@ -56,8 +56,16 @@ public class CloudSessionsService : ICloudSessionsService
         var updateResult = await _cloudSessionsRepository.Update(sessionId, cloudSessionData =>
         {
             SessionMemberData joiner = new SessionMemberData(client, publicKeyInfo, profileClientId, cloudSessionData);
+            if (cloudSessionData.IsSessionActivated || cloudSessionData.IsSessionRemoved || cloudSessionData.SessionMembers.Count >= 5 ||
+                cloudSessionData.FindMember(validatorClientInstanceId) == null) throw new UnauthorizedAccessException();
+            if (ByteSync.Common.Business.Auth.AuthenticationProtocol.GetIdentity(publicKeyInfo.PublicKey) != client.Identity)
+                throw new UnauthorizedAccessException();
             joiner.ValidatorInstanceId = validatorClientInstanceId;
+            joiner.JoinExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5);
             
+            var existing = cloudSessionData.PreSessionMembers.SingleOrDefault(m => m.ClientInstanceId == client.ClientInstanceId &&
+                m.Identity == client.Identity && m.JoinExpiresAt > DateTimeOffset.UtcNow && m.ValidatorInstanceId == validatorClientInstanceId);
+            if (existing != null) return false;
             cloudSessionData.PreSessionMembers.Remove(joiner);
             cloudSessionData.PreSessionMembers.RemoveAll(m => m.ClientInstanceId.Equals(joiner.ClientInstanceId));
                         
@@ -149,29 +157,34 @@ public class CloudSessionsService : ICloudSessionsService
         return result;
     }
     
-    public async Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters)
+    public async Task ValidateJoinCloudSession(ValidateJoinCloudSessionParameters parameters, Client? caller = null)
     {
+        if (caller == null || caller.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch ||
+            parameters.ValidatorInstanceId != caller.ClientInstanceId) throw new UnauthorizedAccessException();
         SessionMemberData? joiner = null;
         
         var updateResult = await _cloudSessionsRepository.Update(parameters.SessionId, cloudSessionData =>
         {
-            if (cloudSessionData is { IsSessionActivated: false, IsSessionRemoved: false })
+            if (cloudSessionData is { IsSessionActivated: false, IsSessionRemoved: false } &&
+                cloudSessionData.FindMember(caller.ClientInstanceId)?.Identity == caller.Identity)
             {
                 joiner = cloudSessionData
                     .PreSessionMembers
                     .FirstOrDefault(m =>
                         Equals(m.ClientInstanceId, parameters.JoinerClientInstanceId) && 
-                        Equals(m.ValidatorInstanceId, parameters.ValidatorInstanceId));
+                        Equals(m.ValidatorInstanceId, parameters.ValidatorInstanceId) &&
+                        m.JoinExpiresAt > DateTimeOffset.UtcNow);
 
                 if (joiner != null)
                 {
-                    var finaliationPassword = $"FP_{Guid.NewGuid()}";
-
-                    joiner.FinalizationPassword = finaliationPassword;
-                    parameters.FinalizationPassword = finaliationPassword;
+                    if (string.IsNullOrEmpty(joiner.FinalizationPassword))
+                    {
+                        joiner.FinalizationPassword = $"FP_{Guid.NewGuid()}";
+                    }
+                    parameters.FinalizationPassword = joiner.FinalizationPassword;
                 }
 
-                return true;
+                return joiner != null;
             }
             else
             {
@@ -296,7 +309,7 @@ public class CloudSessionsService : ICloudSessionsService
     public async Task GiveCloudSessionPasswordExchangeKey(Client client, GiveCloudSessionPasswordExchangeKeyParameters parameters)
     {
         var preSessionMemberData = await _cloudSessionsRepository.GetSessionPreMember(parameters.SessionId, parameters.JoinerInstanceId);
-        if (preSessionMemberData == null)
+        if (preSessionMemberData == null || preSessionMemberData.JoinExpiresAt <= DateTimeOffset.UtcNow)
         {
             _logger.LogWarning("GiveCloudSessionPasswordExchangeKey: PreSessionMember not found for {session}", parameters.SessionId);
             return;

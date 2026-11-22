@@ -1,4 +1,4 @@
-﻿using ByteSync.Business.DataNodes;
+using ByteSync.Business.DataNodes;
 using ByteSync.Business.DataSources;
 using ByteSync.Common.Business.Inventories;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -14,6 +14,8 @@ namespace ByteSync.Services.Inventories;
 
 public class DataSourceService : IDataSourceService
 {
+    private readonly ILocalSourceAuthorizationService _authorization;
+
     private readonly ISessionService _sessionService;
     private readonly IDataSourceChecker _dataSourceChecker;
     private readonly IDataEncrypter _dataEncrypter;
@@ -25,8 +27,9 @@ public class DataSourceService : IDataSourceService
 
     public DataSourceService(ISessionService sessionService, IDataSourceChecker dataSourceChecker, IDataEncrypter dataEncrypter,
         IConnectionService connectionService, IInventoryApiClient inventoryApiClient,
-        IDataSourceRepository dataSourceRepository, IDataSourceCodeGenerator codeGenerator, ILogger<DataSourceService> logger)
+        IDataSourceRepository dataSourceRepository, IDataSourceCodeGenerator codeGenerator, ILogger<DataSourceService> logger, ILocalSourceAuthorizationService authorization)
     {
+        _authorization = authorization;
         _sessionService = sessionService;
         _dataSourceChecker = dataSourceChecker;
         _dataEncrypter = dataEncrypter;
@@ -68,6 +71,7 @@ public class DataSourceService : IDataSourceService
 
     public void ApplyAddDataSourceLocally(DataSource dataSource)
     {
+        _authorization.CheckNetworkSource(dataSource, dataSource.ClientInstanceId);
         _dataSourceRepository.AddOrUpdate(dataSource);
         _codeGenerator.RecomputeCodesForNode(dataSource.DataNodeId);
     }
@@ -83,7 +87,16 @@ public class DataSourceService : IDataSourceService
         dataSource.DataNodeId = dataNode.Id;
         dataSource.InitialTimestamp = DateTime.UtcNow;
 
+        _authorization.Grant(dataSource);
         return TryAddDataSource(dataSource);
+    }
+
+    public async Task RestoreDataSource(string path, FileSystemTypes type, DataNode node)
+    {
+        var source = new DataSource { Id = Guid.NewGuid().ToString(), Path = path, Type = type,
+            DataNodeId = node.Id, ClientInstanceId = _connectionService.ClientInstanceId!, InitialTimestamp = DateTime.UtcNow };
+        _authorization.Grant(source, true);
+        await TryAddDataSource(source);
     }
 
     public async Task<bool> TryRemoveDataSource(DataSource dataSource)
@@ -99,6 +112,7 @@ public class DataSourceService : IDataSourceService
         
         if (isRemoveOK)
         {
+            _authorization.Revoke(dataSource);
             ApplyRemoveDataSourceLocally(dataSource);
         }
         

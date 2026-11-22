@@ -7,6 +7,7 @@ namespace ByteSync.Client.IntegrationTests.TestHelpers;
 
 public static class SharedDataPartTestFactory
 {
+    private static string? Normalize(string? path) => path == null ? null : "/" + string.Join("/", path.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries));
     public static SharedDataPart Create(
         string name,
         Inventory inventory,
@@ -20,10 +21,11 @@ public static class SharedDataPartTestFactory
     {
         var inventoryPart = new InventoryPart(inventory, rootPath, inventoryPartType)
         {
+            SourceId = inventory.InventoryParts.FirstOrDefault(p => p.RootPath == rootPath)?.SourceId ?? Guid.NewGuid().ToString(),
             Code = inventory.Code + "1"
         };
 
-        var part = new SharedDataPart(name, inventory, inventoryPart, relativePath, signatureGuid, signatureHash, hasAnalysisError);
+        var part = new SharedDataPart(name, inventory, inventoryPart, Normalize(relativePath), signatureGuid, signatureHash, hasAnalysisError);
         part.ClientInstanceId = overrideClientInstanceId;
         return part;
     }
@@ -40,10 +42,11 @@ public static class SharedDataPartTestFactory
     {
         var inventoryPart = new InventoryPart(inventory, rootPath, inventoryPartType)
         {
+            SourceId = inventory.InventoryParts.FirstOrDefault(p => p.RootPath == rootPath)?.SourceId ?? Guid.NewGuid().ToString(),
             Code = inventory.Code + "1"
         };
 
-        return new SharedDataPart(name, inventory, inventoryPart, relativePath, signatureGuid, signatureHash, hasAnalysisError);
+        return new SharedDataPart(name, inventory, inventoryPart, Normalize(relativePath), signatureGuid, signatureHash, hasAnalysisError);
     }
 
     public static SharedDataPart Create(
@@ -73,10 +76,11 @@ public static class SharedDataPartTestFactory
 
         var inventoryPart = new InventoryPart(inventory, rootPath, inventoryPartType)
         {
+            SourceId = Guid.NewGuid().ToString(),
             Code = inventoryCode + "1"
         };
 
-        return new SharedDataPart(name, inventory, inventoryPart, relativePath, signatureGuid, signatureHash, hasAnalysisError);
+        return new SharedDataPart(name, inventory, inventoryPart, Normalize(relativePath), signatureGuid, signatureHash, hasAnalysisError);
     }
 }
 

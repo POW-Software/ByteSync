@@ -15,7 +15,7 @@ public class CloudflareR2ClientFactory : ICloudflareR2ClientFactory
         _settings = settings.Value;
     }
 
-    public AmazonS3Client GetClient()
+    public IAmazonS3 GetClient()
     {
         if (_client == null)
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ByteSync.Common.Business.EndPoints;
 using ByteSync.Common.Helpers;
@@ -15,6 +15,8 @@ public class SharedFileDefinition
     }
 
     public string Id { get; set; }
+
+    public string? StorageObjectId { get; set; }
 
     public string SessionId { get; set; }
 

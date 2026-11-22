@@ -1,3 +1,4 @@
+using ByteSync.Interfaces.Controls.Inventories;
 ﻿using System.IO;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Communications.Downloading;
@@ -8,10 +9,13 @@ namespace ByteSync.Services.Synchronizations;
 
 public class FileDatesSetter : IFileDatesSetter
 {
+    private readonly ILocalSourceAuthorizationService _authorization;
+
     private readonly ILogger<FileDatesSetter> _logger;
 
-    public FileDatesSetter(ILogger<FileDatesSetter> logger)
+    public FileDatesSetter(ILogger<FileDatesSetter> logger, ILocalSourceAuthorizationService authorization)
     {
+        _authorization = authorization;
         _logger = logger;
     }
     
@@ -19,21 +23,20 @@ public class FileDatesSetter : IFileDatesSetter
     {
         return Task.Run(() =>
         {
+            _authorization.ValidatePath(finalDestination);
             if (downloadTargetDates != null)
             {
                 _logger.LogInformation("{sharedFileDefinitionId}: Setting CreationTime and LastWriteTime on {FinalDestination}", 
                     sharedFileDefinition.Id, finalDestination);
                 
-                File.SetCreationTimeUtc(finalDestination, downloadTargetDates.CreationTimeUtc);
-                File.SetLastWriteTimeUtc(finalDestination, downloadTargetDates.LastWriteTimeUtc);
+                LocalPathSafety.SetDates(finalDestination, downloadTargetDates.CreationTimeUtc, downloadTargetDates.LastWriteTimeUtc);
             }
             else
             {
                 _logger.LogInformation("{sharedFileDefinitionId}: Setting CreationTime and LastWriteTime on {FinalDestination} to now", 
                     sharedFileDefinition.Id, finalDestination);
                 
-                File.SetCreationTimeUtc(finalDestination, DateTime.UtcNow);
-                File.SetLastWriteTimeUtc(finalDestination, DateTime.UtcNow);
+                LocalPathSafety.SetDates(finalDestination, DateTime.UtcNow, DateTime.UtcNow);
             }
         });
     }
@@ -42,21 +45,20 @@ public class FileDatesSetter : IFileDatesSetter
     {
         return Task.Run(() =>
         {
+            _authorization.ValidatePath(finalDestination);
             if (downloadTargetDates != null)
             {
                 _logger.LogInformation("{Type:l}: Setting CreationTime and LastWriteTime on {FinalDestination}", 
                     $"Synchronization.{sharedActionsGroup.Operator}", finalDestination);
                 
-                File.SetCreationTimeUtc(finalDestination, downloadTargetDates.CreationTimeUtc);
-                File.SetLastWriteTimeUtc(finalDestination, downloadTargetDates.LastWriteTimeUtc);
+                LocalPathSafety.SetDates(finalDestination, downloadTargetDates.CreationTimeUtc, downloadTargetDates.LastWriteTimeUtc);
             }
             else
             {
                 _logger.LogInformation("{Type:l}: Setting CreationTime and LastWriteTime on {FinalDestination} to now", 
                     $"Synchronization.{sharedActionsGroup.Operator}", finalDestination);
                 
-                File.SetCreationTimeUtc(finalDestination, DateTime.UtcNow);
-                File.SetLastWriteTimeUtc(finalDestination, DateTime.UtcNow);
+                LocalPathSafety.SetDates(finalDestination, DateTime.UtcNow, DateTime.UtcNow);
             }
         });
     }

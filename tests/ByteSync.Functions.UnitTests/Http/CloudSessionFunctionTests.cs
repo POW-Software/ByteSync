@@ -118,7 +118,7 @@ public class CloudSessionFunctionTests
             .ReturnsAsync(Unit.Value);
         
         var function = new CloudSessionFunction(mediatorMock.Object);
-        var context = new Mock<FunctionContext>().Object;
+        var context = HttpFunctionTestHelper.BuildFunctionContextWithClient();
         var request = new FakeHttpRequestData(context);
         
         var parameters = new ValidateJoinCloudSessionParameters

@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using ByteSync.Common.Business.Sessions;
 using ByteSync.Common.Business.Sessions.Cloud;
@@ -14,6 +14,8 @@ public interface ICloudSessionApiClient
 
     Task ResetCloudSession(string sessionId);
     
+    Task<List<string>> BeginJoin(AskCloudSessionPasswordExchangeKeyParameters parameters, CancellationToken cancellationToken = default);
+
     Task<JoinSessionResult> AskPasswordExchangeKey(AskCloudSessionPasswordExchangeKeyParameters parameters, 
         CancellationToken cancellationToken = default);
     

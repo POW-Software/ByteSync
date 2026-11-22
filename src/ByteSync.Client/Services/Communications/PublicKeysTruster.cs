@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using ByteSync.Assets.Resources;
 using ByteSync.Business;
@@ -142,7 +142,7 @@ public class PublicKeysTruster : IPublicKeysTruster
         
         // Reset the peer trust process data
         var peerTrustProcessData = await _trustProcessPublicKeysRepository.ResetPeerTrustProcessData(
-            requestTrustProcessParameters.SessionId, myPublicKeyCheckData.OtherPartyPublicKeyInfo!.ClientId);
+            requestTrustProcessParameters.SessionId, requestTrustProcessParameters.JoinerPublicKeyCheckData);
         
         var trustDataParameters = new TrustDataParameters(1, 1, false, requestTrustProcessParameters.SessionId, peerTrustProcessData);
         var addTrustedClientViewModel = _flyoutElementViewModelFactory.BuilAddTrustedClientViewModel(
@@ -152,7 +152,7 @@ public class PublicKeysTruster : IPublicKeysTruster
     
     public async Task OnPublicKeyValidationIsFinishedAsync(PublicKeyValidationParameters publicKeyValidationParameters)
     {
-        if (publicKeyValidationParameters.OtherPartyClientInstanceId.Equals(_environmentService.ClientInstanceId))
+        if (publicKeyValidationParameters.OtherPartyClientInstanceId == _environmentService.ClientInstanceId)
         {
             await _trustProcessPublicKeysRepository.SetOtherPartyChecked(publicKeyValidationParameters.SessionId,
                 publicKeyValidationParameters);
@@ -164,6 +164,7 @@ public class PublicKeysTruster : IPublicKeysTruster
     {
         var parameters = new PublicKeyValidationParameters();
         
+        parameters.ExchangeId = publicKeyCheckData.Salt;
         parameters.IsValidated = isValidated;
         parameters.SessionId = trustDataParameters.SessionId;
         parameters.IssuerClientId = _publicKeysManager.GetMyPublicKeyInfo().ClientId;
@@ -227,7 +228,7 @@ public class PublicKeysTruster : IPublicKeysTruster
             cpt += 1;
             
             var peerTrustProcessData = await _trustProcessPublicKeysRepository
-                .ResetPeerTrustProcessData(sessionId, publicKeyCheckData.IssuerPublicKeyInfo.ClientId);
+                .ResetPeerTrustProcessData(sessionId, publicKeyCheckData);
             
             var trustDataParameters = new TrustDataParameters(cpt, keysToTrust.Count, true, sessionId, peerTrustProcessData);
             var addTrustedClientViewModel = _flyoutElementViewModelFactory.BuilAddTrustedClientViewModel(
@@ -274,7 +275,7 @@ public class PublicKeysTruster : IPublicKeysTruster
             return JoinSessionResult.BuildFrom(JoinSessionStatus.SessionNotFound);
         }
         
-        memberIdsToCheck.RemoveAll(id => id.StartsWith(_environmentService.ClientId));
+        memberIdsToCheck.RemoveAll(id => ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf(id, _environmentService.Identity));
         if (memberIdsToCheck.Count == 0)
         {
             return JoinSessionResult.BuildProcessingNormally();

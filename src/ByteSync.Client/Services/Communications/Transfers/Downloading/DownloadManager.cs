@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.SharedFiles;
+using ByteSync.Common.Business.SharedFiles;
 using ByteSync.Interfaces.Controls.Communications;
 using ByteSync.Interfaces.Controls.Communications.Http;
 
@@ -59,16 +59,19 @@ public class DownloadManager : IDownloadManager
             
             await fileDownloader.WaitForFileFullyExtracted();
 
+            downloadTarget.CheckAccess();
             if (downloadTarget.TemporaryFileManagers != null)
             {
                 foreach (var tempFileHelper in downloadTarget.TemporaryFileManagers)
                 {
+                    downloadTarget.CheckAccess();
                     tempFileHelper.ValidateTemporaryFile();
                 }
             }
         }
         catch (Exception ex)
         {
+            downloadTarget.CheckAccess();
             if (downloadTarget.TemporaryFileManagers != null)
             {
                 foreach (var tempFileHelper in downloadTarget.TemporaryFileManagers)

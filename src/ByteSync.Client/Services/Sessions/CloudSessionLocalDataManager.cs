@@ -1,4 +1,5 @@
-﻿using System.IO;
+using System.IO;
+using ByteSync.Services.Synchronizations;
 using ByteSync.Business;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Common.Business.SharedFiles;
@@ -33,11 +34,12 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
     internal string GetSessionLocalPath()
     {
         var cloudSession = _sessionService.CurrentSession!;
+        LocalPathSafety.ValidateComponent(cloudSession.SessionId);
 
         var sessionLocalPath = IOUtils.Combine(_localApplicationDataManager.ApplicationDataPath, "Sessions",
             $"{cloudSession.SessionId}_{cloudSession.Created:yyyyMMddTHHmmss}");
 
-        Directory.CreateDirectory(sessionLocalPath);
+        LocalPathSafety.CreateDirectory(sessionLocalPath);
 
         return sessionLocalPath;
     }
@@ -56,13 +58,14 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
             var sessionMember = _sessionMemberRepository.GetElement(clientInstanceId);
             machinePath = sessionMember!.MachineName;
         }
-        machinePath += "_" + clientInstanceId;
+        LocalPathSafety.ValidateComponent(clientInstanceId);
+        machinePath = clientInstanceId;
 
         var machineFullPath = IOUtils.Combine(sessionLocalPath, machinePath);
 
         if (!Directory.Exists(machineFullPath))
         {
-            Directory.CreateDirectory(machineFullPath);
+            LocalPathSafety.CreateDirectory(machineFullPath);
         }
 
         return machineFullPath;
@@ -87,6 +90,7 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
 
     public string GetInventoryPath(string clientInstanceId, string inventoryCodeAndId, LocalInventoryModes localInventoryMode)
     {
+        LocalPathSafety.ValidateComponent(inventoryCodeAndId);
         var machineFullPath = GetMachineFullPath(clientInstanceId);
         
         string fileName;
@@ -106,13 +110,15 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
 
     public string GetTempDeltaFullName(SharedDataPart source, SharedDataPart target)
     {
+        if (source.SignatureGuid != null) LocalPathSafety.ValidateComponent(source.SignatureGuid);
+        if (target.SignatureGuid != null) LocalPathSafety.ValidateComponent(target.SignatureGuid);
         var sessionLocalPath = GetSessionLocalPath();
 
         var tempFullPath = IOUtils.Combine(sessionLocalPath, "Temp");
 
         if (!Directory.Exists(tempFullPath))
         {
-            Directory.CreateDirectory(tempFullPath);
+            LocalPathSafety.CreateDirectory(tempFullPath);
         }
 
         var cpt = 0;
@@ -144,13 +150,14 @@ public class CloudSessionLocalDataManager : ICloudSessionLocalDataManager
     {
         if (sharedFileDefinition.IsSynchronization)
         {
+            LocalPathSafety.ValidateComponent(sharedFileDefinition.Id);
             var sessionLocalPath = GetSessionLocalPath();
 
             var tempFullPath = IOUtils.Combine(sessionLocalPath, "Temp");
 
             if (!Directory.Exists(tempFullPath))
             {
-                Directory.CreateDirectory(tempFullPath);
+                LocalPathSafety.CreateDirectory(tempFullPath);
             }
             
             var fileName = $"{sharedFileDefinition.Id}_temp.zip";

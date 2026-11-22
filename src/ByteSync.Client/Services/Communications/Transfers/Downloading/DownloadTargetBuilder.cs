@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+using ByteSync.Interfaces.Controls.Inventories;
+using System.Reactive.Linq;
 using ByteSync.Business.Communications;
 using ByteSync.Business.Communications.Downloading;
 using ByteSync.Business.Sessions;
@@ -16,6 +17,8 @@ namespace ByteSync.Services.Communications.Transfers.Downloading;
 
 public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
 {
+    private readonly ILocalSourceAuthorizationService _authorization;
+
     private readonly ICloudSessionLocalDataManager _cloudSessionLocalDataManager;
     private readonly ISessionProfileLocalDataManager _sessionProfileLocalDataManager;
     private readonly ISharedActionsGroupRepository _sharedActionsGroupRepository;
@@ -34,8 +37,9 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
     public DownloadTargetBuilder(ICloudSessionLocalDataManager cloudSessionLocalDataManager,
         ISessionProfileLocalDataManager sessionProfileLocalDataManager,
         ISharedActionsGroupRepository sharedActionsGroupRepository, IConnectionService connectionService,
-        ITemporaryFileManagerFactory temporaryFileManagerFactory, ISessionService sessionService)
+        ITemporaryFileManagerFactory temporaryFileManagerFactory, ISessionService sessionService, ILocalSourceAuthorizationService authorization)
     {
+        _authorization = authorization;
         _cloudSessionLocalDataManager = cloudSessionLocalDataManager;
         _sessionProfileLocalDataManager = sessionProfileLocalDataManager;
         _sharedActionsGroupRepository = sharedActionsGroupRepository;
@@ -55,9 +59,13 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
     
     public DownloadTarget BuildDownloadTarget(SharedFileDefinition sharedFileDefinition)
     {
+        if (sharedFileDefinition.SessionId != _sessionService.SessionId) throw new UnauthorizedAccessException("Transfer session mismatch");
         // Check cache first
         if (_downloadTargetCache.TryGetValue(sharedFileDefinition.Id, out var existing))
+        {
+            existing.CheckAccess();
             return existing;
+        }
         
         LocalSharedFile? sharedFile = null;
         var downloadDestinations = new HashSet<string>();
@@ -158,6 +166,22 @@ public class DownloadTargetBuilder : IDownloadTargetBuilder, IDisposable
         downloadTarget.LastWriteTimeUtcPerActionsGroupId = datesPerActionsGroupId;
         downloadTarget.TemporaryFileManagers = temporaryFileManagers;
         
+        if (sharedFileDefinition.IsSynchronization)
+        {
+            downloadTarget.ValidateAccess = () =>
+            {
+                foreach (var id in sharedFileDefinition.ActionsGroupIds!)
+                {
+                    var group = _sharedActionsGroupRepository.GetSharedActionsGroup(id) ?? throw new UnauthorizedAccessException();
+                    if (group.Source?.ClientInstanceId != sharedFileDefinition.ClientInstanceId ||
+                        !group.NeedsOperatingOnSourceAndTargets) throw new UnauthorizedAccessException("Transfer source mismatch");
+                    foreach (var destination in downloadTarget.FinalDestinationsPerActionsGroupId![id])
+                        _authorization.ValidateDestination(group, destination);
+                }
+                foreach (var path in downloadTarget.DownloadDestinations) ByteSync.Services.Synchronizations.LocalPathSafety.AssertNoLinks(path);
+            };
+            downloadTarget.CheckAccess();
+        }
         // Store in cache
         _downloadTargetCache[sharedFileDefinition.Id] = downloadTarget;
         

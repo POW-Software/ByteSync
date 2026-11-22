@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using ByteSync.Business.Arguments;
 using ByteSync.Business.Sessions.Connecting;
 using ByteSync.Common.Business.Inventories;
@@ -141,6 +141,8 @@ public class AfterJoinSessionService : IAfterJoinSessionService
                     foreach (var encryptedDataNode in encryptedDataNodes)
                     {
                         var dataNode = _dataEncrypter.DecryptDataNode(encryptedDataNode);
+                        if (dataNode.ClientInstanceId != sessionMemberInfo.ClientInstanceId || dataNode.Id != encryptedDataNode.Id)
+                            throw new UnauthorizedAccessException("Node owner or id mismatch");
                         await _dataNodeService.TryAddDataNode(dataNode);
                     }
                 }
@@ -156,7 +158,8 @@ public class AfterJoinSessionService : IAfterJoinSessionService
             
             foreach (var dataSource in myDataSources)
             {
-                // await _dataSourceService.CreateAndTryAddDataSource(dataSource.Path, dataSource.Type);
+                var node = _dataNodeRepository.CurrentMemberDataNodes.Items.First();
+                await _dataSourceService.RestoreDataSource(dataSource.Path, dataSource.Type, node);
             }
         }
 
@@ -176,6 +179,8 @@ public class AfterJoinSessionService : IAfterJoinSessionService
                         foreach (var encryptedDataSource in encryptedDataSources)
                         {
                             var dataSource = _dataEncrypter.DecryptDataSource(encryptedDataSource);
+                            if (dataSource.ClientInstanceId != sessionMemberInfo.ClientInstanceId || dataSource.DataNodeId != dataNode.Id ||
+                                dataSource.Id != encryptedDataSource.Id) throw new UnauthorizedAccessException("Source owner, node or id mismatch");
                             await _dataSourceService.TryAddDataSource(dataSource);
                         }
                     }

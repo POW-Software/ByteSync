@@ -22,7 +22,7 @@ public class SessionMemberFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/members/InstanceIds")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
-        var result = await _mediator.Send(new GetMembersInstanceIdsRequest(sessionId));
+        var result = await _mediator.Send(new GetMembersInstanceIdsRequest(sessionId, FunctionHelper.GetClientFromContext(executionContext)));
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result);
         return response;
@@ -33,7 +33,7 @@ public class SessionMemberFunction
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "session/{sessionId}/members")] HttpRequestData req,
         FunctionContext executionContext, string sessionId)
     {
-        var result = await _mediator.Send(new GetMembersRequest(sessionId));
+        var result = await _mediator.Send(new GetMembersRequest(sessionId, FunctionHelper.GetClientFromContext(executionContext)));
         var response = req.CreateResponse();
         await response.WriteAsJsonAsync(result);
         return response;
@@ -49,6 +49,7 @@ public class SessionMemberFunction
         var client = FunctionHelper.GetClientFromContext(executionContext);
         var generalStatusParameters = await FunctionHelper.DeserializeRequestBody<UpdateSessionMemberGeneralStatusParameters>(req);
             
+        if (generalStatusParameters.SessionId != sessionId) throw new ByteSync.ServerCommon.Exceptions.BadRequestException("Session route mismatch");
         var request = new SetGeneralStatusRequest(client, generalStatusParameters);
         var result = await _mediator.Send(request);
 

@@ -921,7 +921,7 @@ public class TestInventoryBuilder : IntegrationTest
         
         var saver = new InventorySaver();
         var analyzer = new InventoryFileAnalyzer(FingerprintModes.Rsync, inventoryProcessData, saver,
-            inventoryFileAnalyzerLoggerMock.Object);
+            inventoryFileAnalyzerLoggerMock.Object, Moq.Mock.Of<ByteSync.Interfaces.Controls.Inventories.ILocalSourceAuthorizationService>());
         
         return new InventoryBuilder(sessionMemberInfo, dataNode, sessionSettings, inventoryProcessData,
             osPlatform, FingerprintModes.Rsync, inventoryBuilderloggerMock.Object,

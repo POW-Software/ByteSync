@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 
 namespace ByteSync.Business.Communications.PublicKeysTrusting;
 
@@ -19,6 +19,19 @@ public class PeerTrustProcessData
         SyncRoot = new object();
     }
     
+    public PeerTrustProcessData(ByteSync.Common.Business.EndPoints.PublicKeyCheckData peer) : this(peer.IssuerPublicKeyInfo.ClientId)
+    {
+        OtherPartyIdentity = ByteSync.Common.Business.Auth.AuthenticationProtocol.GetIdentity(peer.IssuerPublicKeyInfo.PublicKey);
+        OtherPartyClientInstanceId = peer.IssuerClientInstanceId;
+        ExchangeId = peer.Salt;
+        if (!ByteSync.Common.Business.Auth.AuthenticationProtocol.IsInstanceOf(OtherPartyClientInstanceId, OtherPartyIdentity) ||
+            string.IsNullOrWhiteSpace(ExchangeId) || ExchangeId.Length > 128)
+            throw new ArgumentException("Invalid peer trust exchange", nameof(peer));
+    }
+
+    public string? OtherPartyClientInstanceId { get; }
+    public string? OtherPartyIdentity { get; }
+    public string? ExchangeId { get; }
     public string OtherPartyClientId { get; }
 
     public bool HasOtherPartyValidatedPublicKey

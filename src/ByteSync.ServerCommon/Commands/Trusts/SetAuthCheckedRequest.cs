@@ -1,11 +1,14 @@
-﻿using ByteSync.Common.Business.Trust.Connections;
+using ByteSync.ServerCommon.Security;
+using ByteSync.Common.Business.Trust.Connections;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Trusts;
 
-public class SetAuthCheckedRequest: IRequest
+public class SetAuthCheckedRequest: IRequest, ISessionRequest
 {
+    public string SessionId => Parameters.SessionId;
+
     public SetAuthCheckedRequest(SetAuthCheckedParameters parameters, Client client)
     {
         Parameters = parameters;

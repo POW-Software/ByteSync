@@ -24,6 +24,7 @@ public class DataNodeService : IDataNodeService
     private readonly IDataSourceRepository _dataSourceRepository;
     private readonly ILogger<DataNodeService> _logger;
     
+    private readonly ILocalSourceAuthorizationService _authorization;
     private int _nodeCounter;
     private readonly SemaphoreSlim _counterSemaphore = new(1, 1);
 
@@ -31,7 +32,7 @@ public class DataNodeService : IDataNodeService
         IDataEncrypter dataEncrypter,
         IInventoryApiClient inventoryApiClient, IDataNodeRepository dataNodeRepository,
         IDataNodeCodeGenerator codeGenerator, IDataSourceService dataSourceService,
-        IDataSourceRepository dataSourceRepository, ILogger<DataNodeService> logger)
+        IDataSourceRepository dataSourceRepository, ILogger<DataNodeService> logger, ILocalSourceAuthorizationService authorization)
     {
         _sessionService = sessionService;
         _connectionService = connectionService;
@@ -42,6 +43,7 @@ public class DataNodeService : IDataNodeService
         _dataSourceService = dataSourceService;
         _dataSourceRepository = dataSourceRepository;
         _logger = logger;
+        _authorization = authorization;
         
         // Reset the counter when a session ends or is reset
         _sessionService.SessionObservable
@@ -133,6 +135,7 @@ public class DataNodeService : IDataNodeService
             
             foreach (var dataSource in associatedDataSources)
             {
+                if (dataSource.ClientInstanceId == _connectionService.ClientInstanceId) _authorization.Revoke(dataSource);
                 _dataSourceService.ApplyRemoveDataSourceLocally(dataSource);
             }
         }
@@ -142,12 +145,16 @@ public class DataNodeService : IDataNodeService
 
     public void ApplyAddDataNodeLocally(DataNode dataNode)
     {
+        var existing = _dataNodeRepository.GetElement(dataNode.Id);
+        if (existing != null && existing.ClientInstanceId != dataNode.ClientInstanceId) throw new UnauthorizedAccessException("Node id already belongs to another instance");
         _dataNodeRepository.AddOrUpdate(dataNode);
         _codeGenerator.RecomputeCodes();
     }
 
     public void ApplyRemoveDataNodeLocally(DataNode dataNode)
     {
+        var existing = _dataNodeRepository.GetElement(dataNode.Id);
+        if (existing != null && existing.ClientInstanceId != dataNode.ClientInstanceId) throw new UnauthorizedAccessException("Node owner mismatch");
         _dataNodeRepository.Remove(dataNode);
         _codeGenerator.RecomputeCodes();
     }

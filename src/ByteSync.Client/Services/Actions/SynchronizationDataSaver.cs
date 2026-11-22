@@ -14,7 +14,7 @@ public class SynchronizationDataSaver
 
     public void Save(string localPath, SharedSynchronizationStartData sharedSynchronizationStartData)
     {
-        using ZipArchive zipArchive = ZipFile.Open(localPath, ZipArchiveMode.Create);
+        using ZipArchive zipArchive = new ZipArchive(ByteSync.Services.Synchronizations.LocalPathSafety.OpenWrite(localPath), ZipArchiveMode.Create);
         
         string json = JsonHelper.Serialize(sharedSynchronizationStartData);
 
@@ -27,7 +27,7 @@ public class SynchronizationDataSaver
 
     public SharedSynchronizationStartData Load(string localPath)
     {
-        using ZipArchive zipArchive = ZipFile.OpenRead(localPath);
+        using ZipArchive zipArchive = new ZipArchive(ByteSync.Services.Synchronizations.LocalPathSafety.OpenRead(localPath), ZipArchiveMode.Read);
         
         var synchronizationActionsFile = zipArchive.GetEntry("synchronization_start_data.json");
 

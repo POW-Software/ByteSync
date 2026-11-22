@@ -1,4 +1,4 @@
-﻿<root>
+<root>
 	<resheader name="resmimetype">
 		<value>text/microsoft-resx</value>
 	</resheader>
@@ -38,5 +38,14 @@ You must select at least 2 data nodes.</value>
   </data>
     <data name="InventoryProcess_LocalInventory_NotLaunched" xml:space="preserve">
     <value>Local Inventory not launched</value>
+  </data>
+	<data name="ConnectionStatus_RelayIncompatible" xml:space="preserve">
+		<value>Incompatible relay server</value>
+	</data>
+	<data name="ConnectionStatus_RelayIncompatibleDetails" xml:space="preserve">
+		<value>The relay server does not provide the secure authentication required by this client. Check the relay address or update the relay server. Automatic reconnection has stopped.</value>
+	</data>
+  <data name="TrustedNetworkView_RenewKeyAvailability" xml:space="preserve">
+    <value>Renew your key outside a session, after connection attempts have finished.</value>
   </data>
 </root>

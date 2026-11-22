@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using ByteSync.Business.Communications.PublicKeysTrusting;
 using ByteSync.Common.Business.EndPoints;
@@ -17,7 +17,7 @@ public interface ITrustProcessPublicKeysRepository : IRepository<TrustProcessPub
 
     Task<bool> IsFullyTrusted(string sessionId, string memberInstanceId);
 
-    Task<PeerTrustProcessData> ResetPeerTrustProcessData(string sessionId, string otherPartyClientId);
+    Task<PeerTrustProcessData> ResetPeerTrustProcessData(string sessionId, PublicKeyCheckData peer);
     
     Task ResetJoinerTrustProcessData(string sessionId);
     

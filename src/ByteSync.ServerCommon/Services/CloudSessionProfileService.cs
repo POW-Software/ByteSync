@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Lobbies.Connections;
+using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Common.Business.Profiles;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
@@ -30,11 +30,14 @@ public class CloudSessionProfileService : ICloudSessionProfileService
 
     public async Task<CreateCloudSessionProfileResult> CreateCloudSessionProfile(string sessionId, Client client)
     {
+        Security.SessionAuthorizationBehavior<object, object>.RequireIdentity(client);
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(sessionId, client.ClientInstanceId);
 
-        if (sessionMemberData != null)
+        if (sessionMemberData != null && sessionMemberData.Identity == client.Identity &&
+            !sessionMemberData.CloudSessionData.IsSessionRemoved && sessionMemberData.CloudSessionData.AuthenticationEpoch == ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch)
         {
             CloudSessionProfileEntity cloudSessionProfileEntity = new CloudSessionProfileEntity();
+            cloudSessionProfileEntity.AuthenticationEpoch = ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch;
             cloudSessionProfileEntity.CloudSessionProfileId = $"CSPID_{Guid.NewGuid()}";
 
             CloudSessionProfileData f;
@@ -46,7 +49,9 @@ public class CloudSessionProfileService : ICloudSessionProfileService
                 var slot = new CloudSessionProfileSlot
                 {
                     ProfileClientId = profileClientId,
-                    ClientId = sessionMember.ClientId
+                    ClientId = sessionMember.ClientId,
+                    Identity = sessionMember.Identity,
+                    OriginalClientInstanceId = sessionMember.ClientInstanceId
                 };
                 
                 cloudSessionProfileEntity.Slots.Add(slot);
@@ -74,13 +79,15 @@ public class CloudSessionProfileService : ICloudSessionProfileService
     public async Task<CloudSessionProfileData?> GetCloudSessionProfileData(GetCloudSessionProfileDataParameters getCloudSessionProfileDataParameters,
         Client client)
     {
+        Security.SessionAuthorizationBehavior<object, object>.RequireIdentity(client);
         var sessionMemberData = await _cloudSessionsRepository.GetSessionMember(getCloudSessionProfileDataParameters.SessionId, client.ClientInstanceId);
 
-        if (sessionMemberData != null)
+        if (sessionMemberData != null && sessionMemberData.Identity == client.Identity &&
+            !sessionMemberData.CloudSessionData.IsSessionRemoved && sessionMemberData.CloudSessionData.AuthenticationEpoch == ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch)
         {
             var cloudSessionProfileEntity = await _cloudSessionProfileRepository.Get(getCloudSessionProfileDataParameters.CloudSessionProfileId);
 
-            if (cloudSessionProfileEntity != null && cloudSessionProfileEntity.Slots.Any(s => s.ClientId == sessionMemberData.ClientId))
+            if (cloudSessionProfileEntity != null && cloudSessionProfileEntity.AuthenticationEpoch == ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch && cloudSessionProfileEntity.Slots.Any(s => s.Identity == client.Identity))
             {
                 var result = BuildCloudSessionProfileCreationData(sessionMemberData, cloudSessionProfileEntity);
 
@@ -93,9 +100,10 @@ public class CloudSessionProfileService : ICloudSessionProfileService
 
     public async Task<string?> GetProfileDetailsPassword(GetProfileDetailsPasswordParameters parameters, Client client)
     {
+        Security.SessionAuthorizationBehavior<object, object>.RequireIdentity(client);
         var cloudSessionProfile = await _cloudSessionProfileRepository.Get(parameters.CloudSessionProfileId);
 
-        if (cloudSessionProfile != null && cloudSessionProfile.Slots.Any(s => s.ProfileClientId == parameters.ProfileClientId))
+        if (cloudSessionProfile != null && cloudSessionProfile.AuthenticationEpoch == ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch && cloudSessionProfile.Slots.Any(s => s.ProfileClientId == parameters.ProfileClientId && s.Identity == client.Identity))
         {
             _logger.LogInformation("GetProfileDetailsPassword: result OK for Client:{ClientInstanceId} with CloudSessionProfileId:{CloudSessionProfileId}",
                 client.ClientInstanceId, parameters.CloudSessionProfileId);
@@ -111,6 +119,9 @@ public class CloudSessionProfileService : ICloudSessionProfileService
 
     public async Task<bool> DeleteCloudSessionProfile(DeleteCloudSessionProfileParameters parameters, Client byteSyncEndpoint)
     {
+        Security.SessionAuthorizationBehavior<object, object>.RequireIdentity(byteSyncEndpoint);
+        var profile = await _cloudSessionProfileRepository.Get(parameters.CloudSessionProfileId);
+        if (profile == null || profile.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch || !profile.Slots.Any(s => s.Identity == byteSyncEndpoint.Identity)) throw new UnauthorizedAccessException();
         await _cloudSessionProfileRepository.Delete(parameters.CloudSessionProfileId);
 
         return true;
@@ -125,7 +136,8 @@ public class CloudSessionProfileService : ICloudSessionProfileService
         cloudSessionProfileCreationData.ProfileDetailsPassword = cloudSessionProfileEntity.ProfileDetailsPassword;
         cloudSessionProfileCreationData.CreationDateTime = cloudSessionProfileEntity.CreationDateTime;
         cloudSessionProfileCreationData.RequesterProfileClientId =
-            cloudSessionProfileEntity.Slots.Single(s => s.ClientId == sessionMemberData.ClientId).ProfileClientId;
+            cloudSessionProfileEntity.Slots.Single(s => s.Identity == sessionMemberData.Identity &&
+                (s.OriginalClientInstanceId == sessionMemberData.ClientInstanceId || s.ProfileClientId == sessionMemberData.ProfileClientId)).ProfileClientId;
 
         return cloudSessionProfileCreationData;
     }

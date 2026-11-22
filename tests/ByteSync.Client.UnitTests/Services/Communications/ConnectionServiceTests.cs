@@ -36,6 +36,157 @@ public class ConnectionServiceTests
         
         _connectionService.RetryDelaySleepDurationProvider = _ => TimeSpan.Zero;
     }
+
+    [TearDown]
+    public void TearDown() => _connectionService.Dispose();
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task StopConnection_DrainsInflightRefreshWithoutRestartingWithOldCredentials(bool refreshFails)
+    {
+        var began = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var refresh = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _mockAuthenticationTokensRepository.Setup(r => r.GetTokens()).ReturnsAsync(new AuthenticationTokens { JwtTokenDurationInSeconds = 4 });
+        _mockConnectionFactory.Setup(f => f.BuildConnection()).ReturnsAsync(new BuildConnectionResult
+            { HubConnection = new TestableHubConnection(), EndPoint = new ByteSyncEndpoint { ClientInstanceId = "old-instance" } });
+        _mockConnectionFactory.Setup(f => f.RefreshAuthenticationTokens()).Returns(() => { began.SetResult(); return refresh.Task; });
+        await _connectionService.StartConnectionAsync();
+        await began.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+        var stop = _connectionService.StopConnection();
+        stop.IsCompleted.Should().BeFalse();
+        if (refreshFails) refresh.SetException(new InvalidOperationException("old refresh failed"));
+        else refresh.SetResult(false);
+        await stop.WaitAsync(TimeSpan.FromSeconds(10));
+
+        _connectionService.ClientInstanceId.Should().Be("old-instance");
+        _connectionService.CurrentConnectionStatus.Should().Be(ConnectionStatuses.NotConnected);
+        _mockConnectionFactory.Verify(f => f.BuildConnection(), Times.Once());
+        _mockConnectionFactory.Verify(f => f.RefreshAuthenticationTokens(), Times.Once());
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task AutomaticRestart_ReleasesTheLifecycleGateAfterSuccessOrAnIncompatibleRelay(bool incompatible)
+    {
+        var restarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _mockAuthenticationTokensRepository.Setup(r => r.GetTokens()).ReturnsAsync(new AuthenticationTokens { JwtTokenDurationInSeconds = 4 });
+        var calls = 0;
+        _mockConnectionFactory.Setup(f => f.BuildConnection()).Returns(() =>
+        {
+            calls++;
+            if (calls == 2 && incompatible) throw new RelayIncompatibleException(new ApiException("Missing auth/challenge"));
+            return Task.FromResult(new BuildConnectionResult { HubConnection = new TestableHubConnection(),
+                EndPoint = new ByteSyncEndpoint { ClientInstanceId = "instance-" + calls } });
+        });
+        _mockConnectionFactory.Setup(f => f.RefreshAuthenticationTokens()).ReturnsAsync(false);
+        using var subscription = _connectionService.ConnectionStatus.Subscribe(status =>
+        {
+            if (calls == 2 && status == (incompatible ? ConnectionStatuses.RelayIncompatible : ConnectionStatuses.Connected)) restarted.TrySetResult();
+        });
+
+        await _connectionService.StartConnectionAsync();
+        await restarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        await _connectionService.StopConnection().WaitAsync(TimeSpan.FromSeconds(10));
+
+        _mockConnectionFactory.Verify(f => f.BuildConnection(), Times.Exactly(2));
+        _connectionService.ClientInstanceId.Should().Be(incompatible ? null : "instance-2");
+    }
+
+    [Test]
+    public async Task FailedHubStop_PropagatesFailureBeforeAnIdentityCanBeChanged()
+    {
+        var hub = new Mock<TestableHubConnection> { CallBase = true };
+        hub.Setup(h => h.StopAsync(It.IsAny<CancellationToken>())).ThrowsAsync(new InvalidOperationException("stop failed"));
+        _mockAuthenticationTokensRepository.Setup(r => r.GetTokens()).ReturnsAsync((AuthenticationTokens?)null);
+        _mockConnectionFactory.Setup(f => f.BuildConnection()).ReturnsAsync(new BuildConnectionResult
+            { HubConnection = hub.Object, EndPoint = new ByteSyncEndpoint { ClientInstanceId = "old-instance" } });
+        await _connectionService.StartConnectionAsync();
+
+        var stop = () => _connectionService.StopConnection();
+
+        await stop.Should().ThrowAsync<InvalidOperationException>();
+        _connectionService.ClientInstanceId.Should().Be("old-instance");
+    }
+
+    [Test]
+    public async Task StartConnection_TracksTheEntirePendingAuthenticationAttempt()
+    {
+        var result = new TaskCompletionSource<BuildConnectionResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _mockConnectionFactory.Setup(f => f.BuildConnection()).Returns(result.Task);
+        _mockAuthenticationTokensRepository.Setup(r => r.GetTokens()).ReturnsAsync((AuthenticationTokens?)null);
+
+        var start = _connectionService.StartConnectionAsync();
+        _connectionService.IsStarting.Should().BeTrue();
+        var duplicate = () => _connectionService.StartConnectionAsync();
+        await duplicate.Should().ThrowAsync<InvalidOperationException>();
+        result.SetResult(new BuildConnectionResult { HubConnection = new TestableHubConnection(), EndPoint = new ByteSyncEndpoint() });
+        await start;
+
+        _connectionService.IsStarting.Should().BeFalse();
+        _mockConnectionFactory.Verify(f => f.BuildConnection(), Times.Once());
+    }
+
+    [Test]
+    public async Task TokenRepository_ClearForcesSubsequentAuthenticationToUseFreshTokens()
+    {
+        var repository = new AuthenticationTokensRepository();
+        await repository.Store(new AuthenticationTokens { JwtToken = "old-token", RefreshToken = "old-refresh" });
+
+        await repository.Clear();
+
+        (await repository.GetTokens()).Should().BeNull();
+        await repository.Store(new AuthenticationTokens { JwtToken = "new-token" });
+        (await repository.GetTokens())!.JwtToken.Should().Be("new-token");
+    }
+
+    [Test]
+    public async Task MissingChallengeEndpoint_ClearsConnectionAndPublishesTerminalStatusWithoutRetrying()
+    {
+        var error = new RelayIncompatibleException(new ApiException("Not Found", System.Net.HttpStatusCode.NotFound));
+        _mockConnectionFactory.SetupSequence(f => f.BuildConnection())
+            .ThrowsAsync(error)
+            .ThrowsAsync(new BuildConnectionException("Unexpected retry", InitialConnectionStatus.VersionNotAllowed));
+        _connectionService.CurrentEndPoint = new ByteSyncEndpoint { ClientId = "stale", ClientInstanceId = "stale" };
+        var statuses = new List<ConnectionStatuses>();
+        using var subscription = _connectionService.ConnectionStatus.Subscribe(statuses.Add);
+        Microsoft.AspNetCore.SignalR.Client.HubConnection? currentConnection = null;
+        using var connectionSubscription = _connectionService.Connection.Subscribe(c => currentConnection = c);
+
+        var act = () => _connectionService.StartConnectionAsync();
+
+        (await act.Should().ThrowAsync<RelayIncompatibleException>()).Which.Should().BeSameAs(error);
+        _mockConnectionFactory.Verify(f => f.BuildConnection(), Times.Once);
+        statuses.Should().Equal(ConnectionStatuses.NotConnected, ConnectionStatuses.Connecting,
+            ConnectionStatuses.NotConnected, ConnectionStatuses.RelayIncompatible);
+        _connectionService.CurrentEndPoint.Should().BeNull();
+        _connectionService.ClientInstanceId.Should().BeNull();
+        currentConnection.Should().BeNull();
+        _mockLogger.Verify(l => l.Log(LogLevel.Error, It.IsAny<EventId>(),
+            It.Is<It.IsAnyType>((state, _) => state.ToString()!.Contains("auth/challenge") && state.ToString()!.Contains("Automatic reconnection has stopped")),
+            error, It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+    }
+
+    [Test]
+    public async Task ManualStartAfterRelayUpgrade_CanConnectAgain()
+    {
+        _mockAuthenticationTokensRepository.Setup(r => r.GetTokens()).ReturnsAsync((AuthenticationTokens?)null);
+        _mockConnectionFactory.SetupSequence(f => f.BuildConnection())
+            .ThrowsAsync(new RelayIncompatibleException(new ApiException("Not Found")))
+            .ReturnsAsync(new BuildConnectionResult
+            {
+                HubConnection = new TestableHubConnection(),
+                EndPoint = new ByteSyncEndpoint { ClientId = "compatible", ClientInstanceId = "compatible" }
+            });
+        var initialStart = () => _connectionService.StartConnectionAsync();
+        await initialStart.Should().ThrowAsync<RelayIncompatibleException>();
+
+        await _connectionService.StartConnectionAsync();
+
+        _connectionService.CurrentConnectionStatus.Should().Be(ConnectionStatuses.Connected);
+        _connectionService.ClientInstanceId.Should().Be("compatible");
+        _mockConnectionFactory.Verify(f => f.BuildConnection(), Times.Exactly(2));
+    }
     
     [Test]
     public async Task StartConnectionAsync_ShouldRetryOnException_ExceptVersionNotAllowed()

@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Business.Lobbies;
+using ByteSync.Common.Business.Lobbies;
 using ByteSync.Common.Business.Lobbies.Connections;
 using ByteSync.Common.Helpers;
 using ByteSync.ServerCommon.Entities;
@@ -40,6 +40,13 @@ public class TryJoinLobbyCommandHandler : IRequestHandler<TryJoinLobbyRequest, J
         var joinLobbyParameters = request.JoinLobbyParameters;
         var client = request.Client;
         
+        ByteSync.ServerCommon.Security.SessionAuthorizationBehavior<object, object>.RequireIdentity(client);
+        if (ByteSync.Common.Business.Auth.AuthenticationProtocol.GetIdentity(joinLobbyParameters.PublicKeyInfo.PublicKey) != client.Identity)
+            throw new UnauthorizedAccessException();
+        var authorizedProfile = await _cloudSessionProfileRepository.Get(joinLobbyParameters.CloudSessionProfileId);
+        if (authorizedProfile == null || authorizedProfile.AuthenticationEpoch != ByteSync.Common.Business.Auth.AuthenticationProtocol.Epoch || !authorizedProfile.Slots.Any(s => s.ProfileClientId == joinLobbyParameters.ProfileClientId && s.Identity == client.Identity))
+            throw new UnauthorizedAccessException();
+
         JoinLobbyResult? joinLobbyResult = null;
         bool? isConnected = null;
         

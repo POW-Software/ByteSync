@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using Autofac.Features.Indexed;
 using ByteSync.Business.Communications.Downloading;
@@ -74,6 +74,7 @@ public class FileDownloader : IFileDownloader
                     var partToMerge = await _partsCoordinator.MergeChannel.Reader.ReadAsync();
                     try
                     {
+                        DownloadTarget.CheckAccess();
                         await _fileMerger.MergeAsync(partToMerge);
                     }
                     finally

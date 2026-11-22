@@ -126,11 +126,11 @@ public class CacheRepository<T> : ICacheRepository<T> where T : class
 
         if (database is ITransaction)
         {
-            _ = database.StringSetAsync(cacheKey.Value, serializedElement, _expiry);
+            _ = database.StringSetAsync(cacheKey.Value, serializedElement, _expiry, When.Always);
             return new UpdateEntityResult<T>(element, UpdateEntityStatus.WaitingForTransaction);
         }
         
-        await database.StringSetAsync(cacheKey.Value, serializedElement, _expiry);
+        await database.StringSetAsync(cacheKey.Value, serializedElement, _expiry, When.Always);
         return new UpdateEntityResult<T>(element, UpdateEntityStatus.Saved);
     }
 }

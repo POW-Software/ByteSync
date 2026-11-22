@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading;
 using ByteSync.Business.Actions.Shared;
 using ByteSync.Business.Synchronizations;
@@ -122,6 +122,8 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
 
             try
             {
+                sharedActionsGroup.GetSourceFullName();
+                _currentMultiUploadZip.AccessValidators.Add(() => sharedActionsGroup.GetSourceFullName());
                 _currentMultiUploadZip.AddEntry(fileInfo, sharedActionsGroup.ActionsGroupId);
             }
             catch (Exception ex)
@@ -146,6 +148,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
                 $"Synchronization.{sharedActionsGroup.Operator}", localFullName, deltaFullName != null);
 
             var fileUploader = _fileUploaderFactory.Build(uploadFullName, sharedFileDefinition);
+            fileUploader.ValidateAccess = () => sharedActionsGroup.GetSourceFullName();
             var uploadTask = RunUploadTask(sharedActionsGroup, fileUploader,
                 () => DeleteDeltaFile(deltaFullName));
             
@@ -158,7 +161,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
         if (deltaFullName != null)
         {
             _logger.LogInformation("Deleting delta file {delta}", deltaFullName);
-            File.Delete(deltaFullName);
+            LocalPathSafety.Delete(deltaFullName);
         }
     }
 
@@ -232,6 +235,7 @@ public class SynchronizationActionRemoteUploader : ISynchronizationActionRemoteU
             
             var currentMultiUploadZip = _currentMultiUploadZip;
             var fileUploader = _fileUploaderFactory.Build(currentMultiUploadZip.MemoryStream, currentMultiUploadZip.SharedFileDefinition);
+            fileUploader.ValidateAccess = () => { foreach (var validate in currentMultiUploadZip.AccessValidators) validate(); };
             var uploadTask = RunUploadTask(currentMultiUploadZip.ActionGroupsIds, fileUploader, 
                 () => currentMultiUploadZip.Dispose());
             UploadTasks.Add(uploadTask);

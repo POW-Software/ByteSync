@@ -1,10 +1,11 @@
-﻿using ByteSync.Common.Business.Inventories;
+using ByteSync.ServerCommon.Security;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class AddDataSourceRequest : IRequest<bool>
+public class AddDataSourceRequest : IRequest<bool>, ISessionRequest
 {
     public AddDataSourceRequest(string sessionId, Client client, string clientInstanceId, string dataNodeId, EncryptedDataSource encryptedDataSource)
     {

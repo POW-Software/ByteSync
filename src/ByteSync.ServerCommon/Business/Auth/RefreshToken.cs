@@ -2,6 +2,8 @@
 
 public class RefreshToken : ICloneable
 {
+    public int AuthenticationEpoch { get; set; }
+
     public RefreshToken()
     {
 

@@ -21,6 +21,10 @@ public class ConnectionService : IConnectionService, IDisposable
     
     private readonly IDisposable? _connectionSubscription;
     private CancellationTokenSource? _refreshCancellationTokenSource;
+    private readonly object _refreshGate = new();
+    private readonly SemaphoreSlim _lifecycleGate = new(1, 1);
+    private Task<bool>? _refreshOperation;
+    public bool IsStarting { get; private set; }
 
     public ConnectionService(IConnectionFactory connectionFactory, IAuthenticationTokensRepository authenticationTokensRepository, 
         ILogger<ConnectionService> logger)
@@ -68,12 +72,15 @@ public class ConnectionService : IConnectionService, IDisposable
 
     public Func<int, TimeSpan>? RetryDelaySleepDurationProvider { get; set; }
     
-    public async Task StartConnectionAsync()
+    public Task StartConnectionAsync() => StartConnectionCore(false);
+
+    private async Task StartConnectionCore(bool lifecycleHeld)
     {
         var retryDelaySleepDurationProvider = RetryDelaySleepDurationProvider;
 
         var retryPolicy = Policy
-            .Handle<Exception>(ex => !(ex is BuildConnectionException bce && bce.InitialConnectionStatus == InitialConnectionStatus.VersionNotAllowed))
+            .Handle<Exception>(ex => ex is not RelayIncompatibleException &&
+                !(ex is BuildConnectionException bce && bce.InitialConnectionStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof))
             .WaitAndRetryForeverAsync(
                 retryAttempt => retryDelaySleepDurationProvider?.Invoke(retryAttempt) ?? TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                 (exception, _, _) =>
@@ -83,35 +90,51 @@ public class ConnectionService : IConnectionService, IDisposable
 
                     _logger.LogError(exception, "An error occurred while starting the connection");
                 });
-        
-        await retryPolicy.ExecuteAsync(async () =>
+
+        if (IsStarting) throw new InvalidOperationException("Connection is already starting");
+        IsStarting = true;
+        try
         {
-            _logger.LogInformation("Starting connection");
-
-            ConnectionStatusSubject.OnNext(ConnectionStatuses.Connecting);
-
-            var result = await _connectionFactory.BuildConnection();
-            
-            ConnectionSubject.OnNext(result.HubConnection);
-            
-            if (result.HubConnection != null)
+            await retryPolicy.ExecuteAsync(async () =>
             {
-                CurrentEndPoint = result.EndPoint!;
-                
-                ConnectionStatusSubject.OnNext(ConnectionStatuses.Connected);
-            }
-            else
-            {
-                if (result.AuthenticateResponseStatus == InitialConnectionStatus.VersionNotAllowed)
+                _logger.LogInformation("Starting connection");
+
+                ConnectionStatusSubject.OnNext(ConnectionStatuses.Connecting);
+
+                var result = await _connectionFactory.BuildConnection();
+
+                ConnectionSubject.OnNext(result.HubConnection);
+
+                if (result.HubConnection != null)
                 {
-                    ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
+                    CurrentEndPoint = result.EndPoint!;
+
+                    IsStarting = false;
+                    ConnectionStatusSubject.OnNext(ConnectionStatuses.Connected);
                 }
-                
-                throw new BuildConnectionException("Unable to connect", result.AuthenticateResponseStatus);
-            }
-        });
+                else
+                {
+                    if (result.AuthenticateResponseStatus is InitialConnectionStatus.VersionNotAllowed or InitialConnectionStatus.InvalidProof)
+                    {
+                        ConnectionStatusSubject.OnNext(ConnectionStatuses.NotConnected);
+                    }
+
+                    throw new BuildConnectionException("Unable to connect", result.AuthenticateResponseStatus);
+                }
+            });
+        }
+        catch (RelayIncompatibleException ex)
+        {
+            if (lifecycleHeld) await StopConnectionCore();
+            else await StopConnection();
+            CurrentEndPoint = null;
+            ConnectionStatusSubject.OnNext(ConnectionStatuses.RelayIncompatible);
+            _logger.LogError(ex, "{RelayCompatibilityError}", ex.Message);
+            throw;
+        }
+        finally { IsStarting = false; }
     }
-    
+
     private async Task StartOrRestartJwtTokensRefreshTimer()
     {
         await CancelCurrentRefreshCancellationTokenSource();
@@ -133,12 +156,13 @@ public class ConnectionService : IConnectionService, IDisposable
                     
                     try
                     {
-                        await RefreshJwtTokens();
+                        await RefreshJwtTokens(cancellationToken);
                     }
                     catch (Exception ex)
                     {
+                        if (cancellationToken.IsCancellationRequested) break;
                         _logger.LogError(ex, "An error occurred while refreshing JWT tokens");
-                        await RestartConnection();
+                        await RestartConnection(cancellationToken);
                     }
                 }
             }
@@ -157,10 +181,10 @@ public class ConnectionService : IConnectionService, IDisposable
         }
     }
 
-    private async Task RefreshJwtTokens()
+    private async Task RefreshJwtTokens(CancellationToken cancellationToken)
     {
         var retryPolicy = Policy
-            .Handle<Exception>(ex => !(ex is HttpRequestException httpRequestException && httpRequestException.Message.Contains("401")))
+            .Handle<Exception>(ex => ex is not OperationCanceledException && !(ex is HttpRequestException httpRequestException && httpRequestException.Message.Contains("401")))
             .Or<HttpRequestException>(ex => !ex.Message.Contains("401"))
             .WaitAndRetryAsync(5,
                 _ => TimeSpan.FromSeconds(10),
@@ -169,11 +193,19 @@ public class ConnectionService : IConnectionService, IDisposable
                     _logger.LogError(exception, "Attempt {CurrentAttempt}: An error occurred while refreshing jwt tokens", currentAttempt);
                 });
         
-        await retryPolicy.ExecuteAsync(async () =>
+        await retryPolicy.ExecuteAsync(async _ =>
         {
+            cancellationToken.ThrowIfCancellationRequested();
             _logger.LogInformation("Start refreshing jwt tokens");
 
-            var refreshTokens = await _connectionFactory.RefreshAuthenticationTokens();
+            Task<bool> operation;
+            lock (_refreshGate)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                operation = _refreshOperation = _connectionFactory.RefreshAuthenticationTokens();
+            }
+            var refreshTokens = await operation;
+            cancellationToken.ThrowIfCancellationRequested();
             if (refreshTokens)
             {
                 _logger.LogInformation("successfully refreshed jwt tokens");
@@ -182,12 +214,19 @@ public class ConnectionService : IConnectionService, IDisposable
             {
                 _logger.LogWarning("failed to refresh jwt tokens");
 
-                _ = RestartConnection();
+                await RestartConnection(cancellationToken);
             }
-        });
+        }, cancellationToken);
     }
 
     public async Task StopConnection()
+    {
+        await _lifecycleGate.WaitAsync();
+        try { await StopConnectionCore(); }
+        finally { _lifecycleGate.Release(); }
+    }
+
+    private async Task StopConnectionCore()
     {
         await CancelCurrentRefreshCancellationTokenSource();
         
@@ -201,6 +240,7 @@ public class ConnectionService : IConnectionService, IDisposable
             catch (Exception e)
             {
                 _logger.LogError(e, "An error occurred while stopping the connection");
+                throw;
             }
         }
 
@@ -214,20 +254,31 @@ public class ConnectionService : IConnectionService, IDisposable
         _refreshCancellationTokenSource?.Dispose();
     }
     
-    private async Task RestartConnection()
+    private async Task RestartConnection(CancellationToken cancellationToken)
     {
-        await StopConnection();
-        await StartConnectionAsync();
-    }
-    
-    private Task CancelCurrentRefreshCancellationTokenSource()
-    {
-        var currentRefreshCancellationTokenSource = _refreshCancellationTokenSource;
-        if (currentRefreshCancellationTokenSource != null)
+        await _lifecycleGate.WaitAsync();
+        try
         {
-            _ = currentRefreshCancellationTokenSource.CancelAsync();
+            if (cancellationToken.IsCancellationRequested || CurrentConnectionStatus == ConnectionStatuses.RelayIncompatible)
+                return;
+            await StopConnectionCore();
+            await StartConnectionCore(true);
         }
-        
-        return Task.CompletedTask;
+        finally { _lifecycleGate.Release(); }
+    }
+
+    private async Task CancelCurrentRefreshCancellationTokenSource()
+    {
+        Task<bool>? operation;
+        lock (_refreshGate)
+        {
+            _refreshCancellationTokenSource?.Cancel();
+            operation = _refreshOperation;
+        }
+        if (operation != null)
+        {
+            try { await operation; }
+            catch (Exception ex) { _logger.LogDebug(ex, "Previous token refresh ended while stopping the connection"); }
+        }
     }
 }

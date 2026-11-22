@@ -7,6 +7,8 @@ namespace ByteSync.ServerCommon.Entities;
 
 public class Lobby
 {
+    public int AuthenticationEpoch { get; set; }
+
     public Lobby()
     {
         LobbyMemberCells = new List<LobbyMemberCell>();

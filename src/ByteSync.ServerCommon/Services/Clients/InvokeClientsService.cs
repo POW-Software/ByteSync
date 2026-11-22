@@ -1,4 +1,4 @@
-﻿using ByteSync.Common.Interfaces.Hub;
+using ByteSync.Common.Interfaces.Hub;
 using ByteSync.ServerCommon.Business.Auth;
 using ByteSync.ServerCommon.Business.Sessions;
 using ByteSync.ServerCommon.Interfaces.Factories;
@@ -76,7 +76,7 @@ public class InvokeClientsService : IInvokeClientsService
         var connectionId = client.ConnectionIds.LastOrDefault();
         if (connectionId != null)
         {
-            return _hubContext.Clients.GroupExcept(groupId, client.ConnectionIds.Last());
+            return _hubContext.Clients.GroupExcept(groupId, client.ConnectionIds.ToArray());
         }
         else
         {

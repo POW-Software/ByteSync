@@ -1,9 +1,10 @@
+using ByteSync.ServerCommon.Security;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Synchronizations;
 
-public class RequestSynchronizationAbortRequest : IRequest
+public class RequestSynchronizationAbortRequest : IRequest, ISessionRequest
 {
     public RequestSynchronizationAbortRequest(string sessionId, Client client)
     {

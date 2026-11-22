@@ -1,10 +1,11 @@
-﻿using ByteSync.Common.Business.Inventories;
+using ByteSync.ServerCommon.Security;
+using ByteSync.Common.Business.Inventories;
 using ByteSync.ServerCommon.Business.Auth;
 using MediatR;
 
 namespace ByteSync.ServerCommon.Commands.Inventories;
 
-public class StartInventoryRequest : IRequest<StartInventoryResult>
+public class StartInventoryRequest : IRequest<StartInventoryResult>, ISessionRequest
 {
     public StartInventoryRequest(string sessionId, Client client)
     {

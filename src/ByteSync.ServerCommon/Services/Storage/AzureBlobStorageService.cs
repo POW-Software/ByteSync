@@ -1,4 +1,4 @@
-﻿using Azure.Storage;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
@@ -39,16 +39,8 @@ public class AzureBlobStorageService : IAzureBlobStorageService
         
         BlobClient blobClient = container.GetBlobClient(finalFileName);
         
-        double minutes;
-        if (permission == BlobSasPermissions.Write)
-        {
-            minutes = 60;
-        }
-        else
-        {
-            minutes = 20;
-        }
-        
+        const double minutes = 5;
+
         BlobSasBuilder sasBuilder = new BlobSasBuilder()
         {
             BlobContainerName = blobClient.BlobContainerName,
@@ -73,8 +65,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
     
     private string GetServerFileName(SharedFileDefinition sharedFileDefinition, int partNumber)
     {
-        return sharedFileDefinition.SessionId + "_" + sharedFileDefinition.ClientInstanceId + "_" +
-               sharedFileDefinition.GetFileName(partNumber);
+        return $"{Guid.ParseExact(sharedFileDefinition.StorageObjectId!, "N"):N}/part-{partNumber}";
     }
     
     public async Task DeleteObject(SharedFileDefinition sharedFileDefinition, int partNumber)
